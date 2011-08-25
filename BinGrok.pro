@@ -10,9 +10,12 @@ TARGET = BinGrok
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        mainwindow.cpp
+SOURCES += \
+    bingrokwindow.cc \
+    main.cc
 
-HEADERS  += mainwindow.h
+HEADERS  += \
+    bingrokwindow.h
 
-FORMS    += mainwindow.ui
+FORMS    += \
+    bingrokwindow.ui
