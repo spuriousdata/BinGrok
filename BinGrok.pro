@@ -12,10 +12,12 @@ TEMPLATE = app
 
 SOURCES += \
     bingrokwindow.cc \
-    main.cc
+    main.cc \
+    bghexwidget.cc
 
 HEADERS  += \
-    bingrokwindow.h
+    bingrokwindow.h \
+    bghexwidget.h
 
 FORMS    += \
     bingrokwindow.ui
