@@ -1,5 +1,7 @@
 #include "bingrokwindow.h"
 #include "ui_bingrokwindow.h"
+#include "bghexwidget.h"
+#include "unistd.h"
 
 #include <QSettings>
 #include <QCloseEvent>
@@ -8,21 +10,38 @@
 #include <QDataStream>
 #include <QMessageBox>
 #include <QDebug>
+#include <QWidget>
+#include <QHBoxLayout>
+#include <QScrollBar>
 
 BinGrokWindow::BinGrokWindow(QWidget *parent) :
     QMainWindow(parent),
 	ui(new Ui::BinGrokWindow)
 {
+	QWidget *container = new QWidget(this);
+	QHBoxLayout *layout = new QHBoxLayout(container);
+
     ui->setupUi(this);
 
-	// out slots
+	hexwidget = new BGHexWidget(container);
+	hexwidget->setSizePolicy(QSizePolicy(
+								 QSizePolicy::Expanding,
+								 QSizePolicy::Expanding
+								 )
+							 );
+	layout->addWidget(hexwidget);
+	vscroll = new QScrollBar(container);
+	layout->addWidget(vscroll);
+	vscroll->setRange(0,0);
+	setCentralWidget(container);
+
 	connect(ui->action_New, SIGNAL(triggered()), this, SLOT(new_file()));
 	connect(ui->action_Open, SIGNAL(triggered()), this, SLOT(open()));
 	connect(ui->action_Save, SIGNAL(triggered()), this, SLOT(save()));
 	connect(ui->action_SaveAs, SIGNAL(triggered()), this, SLOT(save_as()));
 
-	// built-in slots
-	//connect(ui->action_Cut, SIGNAL(triggered()),
+	connect(hexwidget, SIGNAL(update_scroll(off_t,off_t)),
+			this, SLOT(update_scroll(off_t,off_t)));
 
 	read_settings();
 }
@@ -31,9 +50,13 @@ void BinGrokWindow::read_settings()
 {
 	QSettings s;
 
-	s.beginGroup("bgwindow");
-	resize(s.value("size", QSize(400,400)).toSize());
-	move(s.value("position", QPoint(200,200)).toPoint());
+	qDebug() << s.childGroups();
+
+	s.beginGroup("window");
+	QSize size = s.value("size", QSize(400,400)).toSize();
+	QPoint pos = s.value("position", QPoint(200,200)).toPoint();
+	resize(size);
+	move(pos);
 	s.endGroup();
 }
 
@@ -41,8 +64,7 @@ void BinGrokWindow::open()
 {
 	QString filename = QFileDialog::getOpenFileName(this);
 	if (!filename.isEmpty()) {
-		// load file into bghexwidget
-		qDebug() << "Called Open(" << filename << ")";
+		hexwidget->open(filename);
 	}
 }
 
@@ -52,7 +74,7 @@ void BinGrokWindow::new_file()
 	// clear bghexwidget
 }
 
-bool BinGrokWindow::save()
+void BinGrokWindow::save()
 {
 	qDebug("save() called");
 	/*
@@ -61,15 +83,14 @@ bool BinGrokWindow::save()
 	  else
 		return save_file(current file);
 	*/
-	return true;
 }
 
-bool BinGrokWindow::save_as()
+void BinGrokWindow::save_as()
 {
 	QString filename = QFileDialog::getSaveFileName(this);
 	if (filename.isEmpty())
-		return false;
-	return save_file(filename);
+		return;
+	save_file(filename);
 }
 
 bool BinGrokWindow::save_file(const QString &filename)
@@ -95,19 +116,29 @@ bool BinGrokWindow::save_file(const QString &filename)
 	return true;
 }
 
+void BinGrokWindow::update_scroll(off_t s, off_t e)
+{
+	qDebug() << "update_scroll(" << s << ", " << e << ")";
+	vscroll->setRange(s, e);
+}
+
 void BinGrokWindow::closeEvent(QCloseEvent *e)
 {
 	/* Save size/position on close */
 	QSettings s;
-	s.beginGroup("bgwindow");
+
+	s.beginGroup("window");
 	s.setValue("size", size());
 	s.setValue("position", pos());
 	s.endGroup();
+	s.sync();
 
 	e->accept();
 }
 
 BinGrokWindow::~BinGrokWindow()
-{	
+{
+	delete vscroll;
+	delete hexwidget;
     delete ui;
 }
