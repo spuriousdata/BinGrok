@@ -1,7 +1,11 @@
 #ifndef BGHEXWIDGET_H
 #define BGHEXWIDGET_H
 
+#include "unistd.h"
 #include <QWidget>
+
+class QString;
+class QFile;
 
 class BGHexWidget : public QWidget
 {
@@ -9,15 +13,22 @@ class BGHexWidget : public QWidget
 public:
     explicit BGHexWidget(QWidget *parent = 0);
 	~BGHexWidget();
+	bool open(const QString & filename);
 
 private:
-	qint16 columns;
-	qint8  rows;
-	qint8  bytes_per_column;
+	quint16 columns;
+	quint16 rows;
+	quint8  bytes_per_column;
+	QFile   *file;
 
 	void read_settings();
+	void save();
+	void close();
+	bool maybe_save();
+	off_t bytes_per_line();
 
 signals:
+	void update_scroll(off_t, off_t);
 
 public slots:
 
