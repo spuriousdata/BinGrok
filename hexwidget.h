@@ -20,6 +20,7 @@ public:
 	~HexWidget();
 	bool open(const QString & filename);
 	bool maybe_save();
+	inline quint8 get_bytes_per_column() { return bytes_per_column; }
 
 protected:
 	void paintEvent(QPaintEvent *e);
