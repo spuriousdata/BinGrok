@@ -31,6 +31,7 @@ signals:
 	void update_scroll(off_t, off_t);
 
 public slots:
+	void update_preferences(const int, const QFont &);
 
 };
 
