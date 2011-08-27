@@ -7,8 +7,8 @@
 #include <QWidget>
 #include <QByteArray>
 #include <QFont>
+#include <QString>
 
-class QString;
 class QFile;
 class QPaintEvent;
 
@@ -36,14 +36,15 @@ private:
 	QByteArray viewport_data;
 	TrTable    trtable;
 
-	off_t bytes_per_line();
-	void  read_settings();
-	void  write_settings();
-	void  save();
-	void  close();
-	void  update_grid_sizes();
-	void  update_viewport_data();
-	void  trigger_resizeEvent();
+	off_t   bytes_per_line();
+	void    read_settings();
+	void    write_settings();
+	void    save();
+	void    close();
+	void    update_grid_sizes();
+	void    update_viewport_data();
+	void    trigger_resizeEvent();
+	QString get_dataword(quint32 offset);
 
 
 signals:

@@ -122,7 +122,7 @@ void HexWidget::close()
 
 void HexWidget::update_grid_sizes()
 {
-	int cwidth  = fontMetrics().maxWidth(); // character width
+	int cwidth  = fontMetrics().width("0"); // character width
 	int cheight = fontMetrics().height();   // character height
 	col_width = (cwidth * 2 * bytes_per_column) + 10; // 10px space
 	row_height = cheight + 10; // 10px space
@@ -136,6 +136,7 @@ void HexWidget::update_preferences(int bpc, const QFont & f)
 	bytes_per_column = bpc;
 	setFont(f);
 
+	write_settings();
 	trigger_resizeEvent();
 }
 
@@ -148,6 +149,18 @@ void HexWidget::update_viewport_data()
 
 	file->seek(0); // this is obviously wrong.
 	viewport_data = file->read(rows*columns);
+}
+
+
+QString HexWidget::get_dataword(quint32 offset)
+{
+	QString data;
+
+	for (int i = 0; i < bytes_per_column; i++) {
+		data.append(trtable.get_hex(viewport_data[offset+i]));
+	}
+
+	return data;
 }
 
 /******************************************************************************
@@ -164,12 +177,14 @@ void HexWidget::paintEvent(QPaintEvent *e)
 	QPalette palette = QApplication::palette(this);
 	painter.setPen(palette.foreground().color());
 
-	int i=0;
+	quint32 i = 0;
 	for (int r = 0; r < rows; r++) {
 		for (int c = 0; c < columns; c++) {
+			QString word = get_dataword(i);
+			i += bytes_per_column;
 			painter.drawText(c*col_width, r*row_height,
 							 col_width, row_height, Qt::AlignLeft,
-							 trtable.get_hex(viewport_data[i++])
+							 word
 							 );
 		}
 	}
@@ -178,7 +193,8 @@ void HexWidget::paintEvent(QPaintEvent *e)
 void HexWidget::resizeEvent(QResizeEvent *e)
 {
 #ifndef QT_NO_DEBUG
-	qDebug() << "resizeEvent(" << e->size().width() << ", " << e->size().height() << ")";
+	qDebug() << "resizeEvent(" << e->size().width() << ", " <<
+				e->size().height() << ")";
 #endif
 
 	update_grid_sizes();
