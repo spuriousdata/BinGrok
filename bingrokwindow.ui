@@ -57,7 +57,7 @@
     <addaction name="action_Find"/>
     <addaction name="action_Replace"/>
     <addaction name="separator"/>
-    <addaction name="action_Options"/>
+    <addaction name="action_Preferences"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -222,9 +222,12 @@
     <string>Ctrl+E</string>
    </property>
   </action>
-  <action name="action_Options">
+  <action name="action_Preferences">
    <property name="text">
-    <string>&amp;Options</string>
+    <string>&amp;Preferences</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
    </property>
   </action>
  </widget>

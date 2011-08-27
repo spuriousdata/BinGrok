@@ -13,11 +13,16 @@ TEMPLATE = app
 SOURCES += \
     bingrokwindow.cc \
     main.cc \
-    bghexwidget.cc
+    hexwidget.cc \
+    trtable.cc \
+    preferences.cc
 
 HEADERS  += \
     bingrokwindow.h \
-    bghexwidget.h
+    hexwidget.h \
+    trtable.h \
+    preferences.h
 
 FORMS    += \
-    bingrokwindow.ui
+    bingrokwindow.ui \
+    preferences.ui
