@@ -1,6 +1,6 @@
 #include "bingrokwindow.h"
 #include "ui_bingrokwindow.h"
-#include "bghexwidget.h"
+#include "hexwidget.h"
 #include "unistd.h"
 
 #include <QSettings>
@@ -23,7 +23,7 @@ BinGrokWindow::BinGrokWindow(QWidget *parent) :
 
     ui->setupUi(this);
 
-	hexwidget = new BGHexWidget(container);
+	hexwidget = new HexWidget(container);
 	hexwidget->setSizePolicy(QSizePolicy(
 								 QSizePolicy::Expanding,
 								 QSizePolicy::Expanding

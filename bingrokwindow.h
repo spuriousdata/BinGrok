@@ -4,7 +4,7 @@
 #include <QMainWindow>
 
 class QString;
-class BGHexWidget;
+class HexWidget;
 class QScrollBar;
 class QFile;
 
@@ -22,7 +22,7 @@ public:
 
 private:
 	Ui::BinGrokWindow *ui;
-	BGHexWidget *hexwidget;
+	HexWidget *hexwidget;
 	QScrollBar *vscroll;
 
 	void read_settings();
