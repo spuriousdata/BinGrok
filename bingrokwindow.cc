@@ -18,8 +18,8 @@ BinGrokWindow::BinGrokWindow(QWidget *parent) :
     QMainWindow(parent),
 	ui(new Ui::BinGrokWindow)
 {
-	QWidget *container = new QWidget(this);
-	QHBoxLayout *layout = new QHBoxLayout(container);
+	container = new QWidget(this);
+	layout = new QHBoxLayout(container);
 
     ui->setupUi(this);
 
@@ -124,16 +124,20 @@ void BinGrokWindow::update_scroll(off_t s, off_t e)
 
 void BinGrokWindow::closeEvent(QCloseEvent *e)
 {
-	/* Save size/position on close */
-	QSettings s;
+	if (hexwidget->maybe_save()) {
+		/* Save size/position on close */
+		QSettings s;
 
-	s.beginGroup("window");
-	s.setValue("size", size());
-	s.setValue("position", pos());
-	s.endGroup();
-	s.sync();
+		s.beginGroup("window");
+		s.setValue("size", size());
+		s.setValue("position", pos());
+		s.endGroup();
+		s.sync();
 
-	e->accept();
+		e->accept();
+	} else {
+		e->ignore();
+	}
 }
 
 BinGrokWindow::~BinGrokWindow()

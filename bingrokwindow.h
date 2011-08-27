@@ -24,6 +24,8 @@ private:
 	Ui::BinGrokWindow *ui;
 	HexWidget *hexwidget;
 	QScrollBar *vscroll;
+	QWidget *container;
+	QHBoxLayout *layout;
 
 	void read_settings();
 	bool save_file(const QString & filename);
