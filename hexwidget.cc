@@ -157,7 +157,12 @@ QString HexWidget::get_dataword(quint32 offset)
 	QString data;
 
 	for (int i = 0; i < bytes_per_column; i++) {
-		data.append(trtable.get_hex(viewport_data[offset+i]));
+		if (file == NULL) data.append(" ");
+		else {
+			int x = offset+i;
+			if (viewport_data.size() < x) data.append(" ");
+			else data.append(trtable.get_hex(viewport_data[x]));
+		}
 	}
 
 	return data;
