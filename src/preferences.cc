@@ -16,7 +16,7 @@ Preferences::Preferences(QWidget *parent) :
 	parent_font = parent->font();
 
 	ui->setupUi(this);
-	ui->bytes_per_column_spinbox->setValue(((HexWidget*)parent)->get_bytes_per_column());
+	ui->bytes_per_column_spinbox->setValue(static_cast<HexWidget*>(parent)->get_bytes_per_column());
 	ui->font_button->setText(font_string(parent_font));
 
 	connect(ui->font_button, SIGNAL(clicked()), this, SLOT(show_font_dialog()));
