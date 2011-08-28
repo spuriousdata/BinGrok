@@ -50,6 +50,7 @@ private:
 
 signals:
 	void update_scroll(off_t, off_t);
+	void file_opened(QFile *);
 
 public slots:
 	void update_preferences(const int, const QFont &);

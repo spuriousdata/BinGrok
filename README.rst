@@ -12,4 +12,6 @@ Installation
 ============
 
 qmake BinGrok.pro
+
 make && make install
+

@@ -16,7 +16,7 @@ Preferences::Preferences(QWidget *parent) :
 	parent_font = parent->font();
 
 	ui->setupUi(this);
-	ui->bytes_per_column_spinbox->setValue(((HexWidget*)parent)->get_bytes_per_column());
+	ui->bytes_per_column_spinbox->setValue(static_cast<HexWidget*>(parent)->get_bytes_per_column());
 	ui->font_button->setText(font_string(parent_font));
 
 	connect(ui->font_button, SIGNAL(clicked()), this, SLOT(show_font_dialog()));
@@ -60,6 +60,16 @@ int Preferences::get_bpc()
 QFont Preferences::get_font()
 {
 	return this->pref_font;
+}
+
+void Preferences::set_mro(quint8 mro)
+{
+	ui->max_recently_open_spinbox->setValue(mro);
+}
+
+quint8 Preferences::get_mro()
+{
+	return ui->max_recently_open_spinbox->value();
 }
 
 Preferences::~Preferences()

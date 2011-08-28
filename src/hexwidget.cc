@@ -61,9 +61,12 @@ bool HexWidget::open(const QString & filename)
 							  QMessageBox::Ok, 0);
 		close();
 		return false;
-	}
+	} /* else success */
+
+	emit file_opened(file);
 
 	trigger_resizeEvent();
+	update();
 	return true;
 }
 
