@@ -17,6 +17,8 @@ public:
     ~Preferences();
 	int get_bpc();
 	QFont get_font();
+	quint8 get_mro();
+	void set_mro(quint8);
 
 private:
     Ui::Preferences *ui;

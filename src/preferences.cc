@@ -62,6 +62,16 @@ QFont Preferences::get_font()
 	return this->pref_font;
 }
 
+void Preferences::set_mro(quint8 mro)
+{
+	ui->max_recently_open_spinbox->setValue(mro);
+}
+
+quint8 Preferences::get_mro()
+{
+	return ui->max_recently_open_spinbox->value();
+}
+
 Preferences::~Preferences()
 {
     delete ui;
