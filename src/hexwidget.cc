@@ -191,9 +191,9 @@ void HexWidget::scroll_changed(int i)
 	update();
 }
 
-void HexWidget::selection(QMouseEvent *e, bool stop_selection=false)
+void HexWidget::selection(QMouseEvent *e, bool new_selection=false)
 {
-	if (!stop_selection) {
+	if (new_selection) {
 		if (sel != NULL) {
 			delete sel;
 		}
@@ -235,7 +235,7 @@ void HexWidget::paintEvent(QPaintEvent *e)
 			i += bytes_per_column;
 
 			if (sel != NULL) {
-				if (sel->in_range(c, r)) {
+				if (sel->in_range(c, r, columns)) {
 					qDebug() << "in_range(" << c << ", " << r << "): true";
 					painter.setBackground(palette.link());
 					painter.setPen(palette.brightText().color());
@@ -294,7 +294,7 @@ void HexWidget::mousePressEvent(QMouseEvent *e)
 #ifndef QT_NO_DEBUG
 		qDebug() << "left mouse pressed";
 #endif
-		selection(e);
+		selection(e, true);
 		e->accept();
 	}
 }
@@ -305,7 +305,8 @@ void HexWidget::mouseReleaseEvent(QMouseEvent *e)
 #ifndef QT_NO_DEBUG
 		qDebug() << "left mouse released";
 #endif
-		selection(e, true);
+		selection(e);
+		update();
 		e->accept();
 	}
 }
@@ -315,6 +316,12 @@ void HexWidget::mouseMoveEvent(QMouseEvent *e)
 	if (sel != NULL) {
 		sel->end(xy_to_grid(e));
 		update();
+		e->accept();
+
+		/* if moved below or above widget bounds
+		 * start timer to emit scroll wheel events up or down
+		 * -- decrease interval for increasing distance from widget bounds
+		 */
 	}
 }
 

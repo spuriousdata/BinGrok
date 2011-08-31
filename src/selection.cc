@@ -1,12 +1,20 @@
 #include "selection.h"
 #include <QPoint>
 
-bool Selection::in_range(int col, int row)
+bool Selection::in_range(int col, int row, int columns)
 {
-	QPoint c = QPoint(col, row);
+	/* need to calculate offset for each comparator */
+	int s = (columns * _start.y()) + _start.x();
+	int e = (columns * _end.y()) + _end.x();
+	int test = (columns * row) + col;
 
-	if (_start.manhattanLength() <= c.manhattanLength() &&
-			_end.manhattanLength() >= c.manhattanLength())
-		return true;
+	/* user was selecting 'up' instead of 'down' */
+	if (e < s) {
+		int tmp = s;
+		s = e;
+		e = tmp;
+	}
+
+	if (test >= s && test <= e) return true;
 	return false;
 }

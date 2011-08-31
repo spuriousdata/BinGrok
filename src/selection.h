@@ -11,7 +11,7 @@ public:
 	void start(QPoint p) { _start = p; }
 	void end(int col, int row) { _end = QPoint(col, row); }
 	void end(QPoint p) { _end = p; }
-	bool in_range(int col, int row);
+	bool in_range(int col, int row, int columns);
 
 private:
 	QPoint _start;

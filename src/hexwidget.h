@@ -57,7 +57,7 @@ private:
 	void    update_viewport_data();
 	void    trigger_resizeEvent();
 	QString get_dataword(quint32 offset);
-	void    selection(QMouseEvent *e, bool stop_selection);
+	void    selection(QMouseEvent *e, bool new_selection);
 	QPoint  xy_to_grid(QMouseEvent *e);
 
 
