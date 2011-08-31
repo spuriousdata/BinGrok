@@ -119,7 +119,7 @@ void BinGrokWindow::open_recent()
 void BinGrokWindow::new_file()
 {
 	qDebug("new_file() called");
-	// clear bghexwidget
+	hexwidget->new_file();
 }
 
 void BinGrokWindow::save()

@@ -67,6 +67,15 @@ bool HexWidget::open(const QString & filename)
 	return true;
 }
 
+void HexWidget::new_file()
+{
+	if (!maybe_save())
+		return;
+	close();
+	trigger_resizeEvent();
+	update();
+}
+
 void HexWidget::trigger_resizeEvent()
 {
 	QResizeEvent *e = new QResizeEvent(size(), size());
