@@ -16,14 +16,11 @@
 #endif
 
 HexWidget::HexWidget(QWidget *parent) :
-	QWidget(parent),file(NULL),seek_to(0)
+	QWidget(parent),file(NULL),seek_to(0),columns(20),rows(20)
 {
 	setBackgroundRole(QPalette::Base);
 	setAutoFillBackground(true);
-
-	columns = 20;
-	rows = 20;
-
+	setEnabled(true);
 	read_settings();
 }
 
@@ -226,6 +223,22 @@ void HexWidget::resizeEvent(QResizeEvent *e)
 		scroll_lines = ((file->size() - bytes_per_page) / bytes_per_line()) + 1;
 		emit update_scroll(0, scroll_lines);
 	}
+}
+
+void HexWidget::wheelEvent(QWheelEvent *e)
+{
+#ifndef QT_NO_DEBUG
+	qDebug() << "delta: " << e->delta();
+	qDebug() << "pos: " << e->pos();
+#endif
+	if (e->delta() > 0) {
+		// positive == scroll up
+		emit scroll_wheel_changed(-1);
+	} else {
+		// negative == scroll down
+		emit scroll_wheel_changed(1);
+	}
+	e->accept();
 }
 
 HexWidget::~HexWidget()

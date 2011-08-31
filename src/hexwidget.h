@@ -25,6 +25,7 @@ public:
 protected:
 	void paintEvent(QPaintEvent *e);
 	void resizeEvent(QResizeEvent *e);
+	void wheelEvent(QWheelEvent *e);
 
 private:
 	quint16    columns;
@@ -54,6 +55,7 @@ private:
 signals:
 	void update_scroll(off_t, off_t);
 	void file_opened(QFile *);
+	void scroll_wheel_changed(int);
 
 public slots:
 	void update_preferences(const int, const QFont &);

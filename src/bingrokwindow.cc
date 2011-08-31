@@ -15,6 +15,7 @@
 #include <QScrollBar>
 #include <QDialogButtonBox>
 #include <QAction>
+#include <QAbstractSlider>
 
 #ifndef QT_NO_DEBUG
 #include <QDebug>
@@ -58,6 +59,8 @@ BinGrokWindow::BinGrokWindow(QWidget *parent) :
 			this, SLOT(update_scroll(off_t,off_t)));
 	connect(hexwidget, SIGNAL(file_opened(QFile*)),
 			this, SLOT(add_recently_open(QFile*)));
+	connect(hexwidget, SIGNAL(scroll_wheel_changed(int)),
+			this, SLOT(handle_scrollwheel(int)));
 
 	read_settings();
 	redraw_recently_open();
@@ -87,6 +90,17 @@ void BinGrokWindow::read_settings()
 	recently_open = s.value("recently_open").toStringList();
 
 	s.endGroup();
+}
+
+void BinGrokWindow::handle_scrollwheel(int i)
+{
+#ifndef QT_NO_DEBUG
+	qDebug() << "handle_scrollwheel(" << i << ")";
+#endif
+	if (i > 0)
+		vscroll->triggerAction(QAbstractSlider::SliderSingleStepAdd);
+	else
+		vscroll->triggerAction(QAbstractSlider::SliderSingleStepSub);
 }
 
 void BinGrokWindow::open()
