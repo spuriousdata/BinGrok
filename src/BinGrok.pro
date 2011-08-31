@@ -15,13 +15,15 @@ SOURCES += \
     main.cc \
     hexwidget.cc \
     trtable.cc \
-    preferences.cc
+    preferences.cc \
+    selection.cc
 
 HEADERS  += \
     bingrokwindow.h \
     hexwidget.h \
     trtable.h \
-    preferences.h
+    preferences.h \
+    selection.h
 
 FORMS    += \
     bingrokwindow.ui \

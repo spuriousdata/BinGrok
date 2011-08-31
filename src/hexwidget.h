@@ -2,6 +2,7 @@
 #define BGHEXWIDGET_H
 
 #include "trtable.h"
+#include "selection.h"
 
 #include "unistd.h"
 #include <QWidget>
@@ -11,6 +12,7 @@
 
 class QFile;
 class QPaintEvent;
+class QMouseEvent;
 
 class HexWidget : public QWidget
 {
@@ -27,6 +29,9 @@ protected:
 	void paintEvent(QPaintEvent *e);
 	void resizeEvent(QResizeEvent *e);
 	void wheelEvent(QWheelEvent *e);
+	void mousePressEvent(QMouseEvent *);
+	void mouseReleaseEvent(QMouseEvent *);
+	void mouseMoveEvent(QMouseEvent *);
 
 private:
 	quint16    columns;
@@ -41,6 +46,7 @@ private:
 	int	       row_height;
 	QByteArray viewport_data;
 	TrTable    trtable;
+	Selection *sel;
 
 	off_t   bytes_per_line();
 	void    read_settings();
@@ -51,6 +57,8 @@ private:
 	void    update_viewport_data();
 	void    trigger_resizeEvent();
 	QString get_dataword(quint32 offset);
+	void    selection(QMouseEvent *e, bool stop_selection);
+	QPoint  xy_to_grid(QMouseEvent *e);
 
 
 signals:
