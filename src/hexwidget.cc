@@ -163,7 +163,7 @@ QString HexWidget::get_dataword(quint32 offset)
 		if (file == NULL) data.append(" ");
 		else {
 			int x = offset+i;
-			if (viewport_data.size() < x) data.append(" ");
+			if (viewport_data.size() <= x) data.append(" ");
 			else data.append(trtable.get_hex(viewport_data[x]));
 		}
 	}
