@@ -10,17 +10,21 @@
 #include <QApplication>
 #include <QFont>
 #include <QResizeEvent>
+#include <QCursor>
+#include <QMouseEvent>
 
 #ifndef QT_NO_DEBUG
 #include <QDebug>
 #endif
 
 HexWidget::HexWidget(QWidget *parent) :
-	QWidget(parent),file(NULL),seek_to(0),columns(20),rows(20)
+	QWidget(parent),file(NULL),seek_to(0),
+	columns(20),rows(20),sel(NULL)
 {
 	setBackgroundRole(QPalette::Base);
 	setAutoFillBackground(true);
 	setEnabled(true);
+	setCursor(Qt::IBeamCursor);
 	read_settings();
 }
 
@@ -187,6 +191,28 @@ void HexWidget::scroll_changed(int i)
 	update();
 }
 
+void HexWidget::selection(QMouseEvent *e, bool stop_selection=false)
+{
+	if (!stop_selection) {
+		if (sel != NULL) {
+			delete sel;
+		}
+		sel = new Selection();
+		sel->start(xy_to_grid(e));
+	} else {
+		sel->end(xy_to_grid(e));
+	}
+}
+
+QPoint HexWidget::xy_to_grid(QMouseEvent *e)
+{
+	QPoint pos = e->pos();
+
+	int ecol = pos.x() / col_width;
+	int erow = pos.y() / row_height;
+	return QPoint(ecol, erow);
+}
+
 /******************************************************************************
  *
  *                             Overrides
@@ -200,12 +226,24 @@ void HexWidget::paintEvent(QPaintEvent *e)
 	painter.setFont(font());
 	QPalette palette = QApplication::palette(this);
 	painter.setPen(palette.foreground().color());
+	painter.setBackgroundMode(Qt::OpaqueMode);
 
 	quint32 i = 0;
 	for (int r = 0; r < rows; r++) {
 		for (int c = 0; c < columns; c++) {
 			QString word = get_dataword(i);
 			i += bytes_per_column;
+
+			if (sel != NULL) {
+				if (sel->in_range(c, r)) {
+					qDebug() << "in_range(" << c << ", " << r << "): true";
+					painter.setBackground(palette.link());
+					painter.setPen(palette.brightText().color());
+				} else {
+					painter.setBackground(palette.base());
+					painter.setPen(palette.foreground().color());
+				}
+			}
 			painter.drawText(c*col_width, r*row_height,
 							 col_width, row_height, Qt::AlignLeft,
 							 word
@@ -248,6 +286,36 @@ void HexWidget::wheelEvent(QWheelEvent *e)
 		emit scroll_wheel_changed(1);
 	}
 	e->accept();
+}
+
+void HexWidget::mousePressEvent(QMouseEvent *e)
+{
+	if (e->button() == Qt::LeftButton) {
+#ifndef QT_NO_DEBUG
+		qDebug() << "left mouse pressed";
+#endif
+		selection(e);
+		e->accept();
+	}
+}
+
+void HexWidget::mouseReleaseEvent(QMouseEvent *e)
+{
+	if (e->button() == Qt::LeftButton) {
+#ifndef QT_NO_DEBUG
+		qDebug() << "left mouse released";
+#endif
+		selection(e, true);
+		e->accept();
+	}
+}
+
+void HexWidget::mouseMoveEvent(QMouseEvent *e)
+{
+	if (sel != NULL) {
+		sel->end(xy_to_grid(e));
+		update();
+	}
 }
 
 HexWidget::~HexWidget()
