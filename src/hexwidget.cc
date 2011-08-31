@@ -16,7 +16,7 @@
 #endif
 
 HexWidget::HexWidget(QWidget *parent) :
-	QWidget(parent),file(NULL)
+	QWidget(parent),file(NULL),seek_to(0)
 {
 	setBackgroundRole(QPalette::Base);
 	setAutoFillBackground(true);
@@ -150,7 +150,7 @@ void HexWidget::update_viewport_data()
 		return;
 	}
 
-	file->seek(0); // this is obviously wrong.
+	file->seek(seek_to);
 	viewport_data = file->read(rows*columns);
 }
 
@@ -169,6 +169,16 @@ QString HexWidget::get_dataword(quint32 offset)
 	}
 
 	return data;
+}
+
+void HexWidget::scroll_changed(int i)
+{
+#ifndef QT_NO_DEBUG
+	qDebug() << "Scroll changed to " << i;
+#endif
+	seek_to = i * bytes_per_line();
+	update_viewport_data();
+	update();
 }
 
 /******************************************************************************
@@ -212,7 +222,9 @@ void HexWidget::resizeEvent(QResizeEvent *e)
 		qDebug() << "file->size() " << file->size();
 		qDebug() << "bytes_per_line() * rows " << bytes_per_line() * rows;
 #endif
-		emit update_scroll(0, file->size() / (bytes_per_line() * rows));
+		bytes_per_page = bytes_per_line() * rows;
+		scroll_lines = ((file->size() - bytes_per_page) / bytes_per_line()) + 1;
+		emit update_scroll(0, scroll_lines);
 	}
 }
 

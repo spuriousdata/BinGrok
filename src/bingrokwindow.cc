@@ -40,7 +40,12 @@ BinGrokWindow::BinGrokWindow(QWidget *parent) :
 	vscroll = new QScrollBar(container);
 	layout->addWidget(vscroll);
 	vscroll->setRange(0,0);
+	vscroll->setTracking(true);
+
 	setCentralWidget(container);
+
+	connect(vscroll, SIGNAL(valueChanged(int)),
+			hexwidget, SLOT(scroll_changed(int)));
 
 	connect(ui->action_New, SIGNAL(triggered()), this, SLOT(new_file()));
 	connect(ui->action_Open, SIGNAL(triggered()), this, SLOT(open()));

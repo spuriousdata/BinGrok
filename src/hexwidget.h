@@ -30,6 +30,9 @@ private:
 	quint16    columns;
 	quint16    rows;
 	quint8     bytes_per_column;
+	quint64    seek_to;
+	quint32    bytes_per_page;
+	quint32    scroll_lines;
 	QFile     *file;
 	off_t      cur_offset;
 	int        col_width;
@@ -54,6 +57,7 @@ signals:
 
 public slots:
 	void update_preferences(const int, const QFont &);
+	void scroll_changed(int);
 
 };
 
