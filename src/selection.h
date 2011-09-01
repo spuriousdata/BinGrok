@@ -6,16 +6,21 @@
 class Selection
 {
 public:
-	Selection() {};
-	void start(int col, int row) { _start = QPoint(col, row); }
-	void start(QPoint p) { _start = p; }
-	void end(int col, int row) { _end = QPoint(col, row); }
-	void end(QPoint p) { _end = p; }
-	bool in_range(int col, int row, int columns);
+	Selection(int columns) : columns(columns) {};
+
+	void start(quint64 x, quint64 y, quint64 tell);
+	void start(QPoint p, quint64 tell) { start(p.x(), p.y(), tell); }
+
+	void end(quint64 x, quint64 y, quint64 tell);
+	void end(QPoint p, quint64 tell) { end(p.x(), p.y(), tell); }
+
+	bool in_range(quint64 x, quint64 y, quint64 tell);
 
 private:
-	QPoint _start;
-	QPoint _end;
+	quint64 columns;
+	quint64 start_offset, end_offset;
+
+	quint64 xy_to_offset(quint64 x, quint64 y, quint64 tell);
 };
 
 #endif // SELECTION_H

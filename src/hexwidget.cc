@@ -193,14 +193,17 @@ void HexWidget::scroll_changed(int i)
 
 void HexWidget::selection(QMouseEvent *e, bool new_selection=false)
 {
+	if (viewport_data.isEmpty())
+		return;
+
 	if (new_selection) {
 		if (sel != NULL) {
 			delete sel;
 		}
-		sel = new Selection();
-		sel->start(xy_to_grid(e));
+		sel = new Selection(columns);
+		sel->start(xy_to_grid(e), seek_to);
 	} else {
-		sel->end(xy_to_grid(e));
+		sel->end(xy_to_grid(e), seek_to);
 	}
 }
 
@@ -235,7 +238,7 @@ void HexWidget::paintEvent(QPaintEvent *e)
 			i += bytes_per_column;
 
 			if (sel != NULL) {
-				if (sel->in_range(c, r, columns)) {
+				if (sel->in_range(c, r, seek_to)) {
 					qDebug() << "in_range(" << c << ", " << r << "): true";
 					painter.setBackground(palette.link());
 					painter.setPen(palette.brightText().color());
@@ -314,7 +317,7 @@ void HexWidget::mouseReleaseEvent(QMouseEvent *e)
 void HexWidget::mouseMoveEvent(QMouseEvent *e)
 {
 	if (sel != NULL) {
-		sel->end(xy_to_grid(e));
+		sel->end(xy_to_grid(e), seek_to);
 		update();
 		e->accept();
 
