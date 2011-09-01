@@ -14,6 +14,7 @@
 class QFile;
 class QPaintEvent;
 class QMouseEvent;
+class QTimer;
 class QScrollBar;
 
 class HexWidget : public QWidget
@@ -52,7 +53,10 @@ private:
 	Selection  *sel;
 	QPoint      mouse_position;
 	bool        mouse_down;
+	QTimer     *scroll_timer;
 	QScrollBar *scrollbar;
+	enum SCROLL_DIRECTION { UP=0, DOWN=2 } scroll_direction;
+	quint8      scroll_speed;
 
 	off_t   bytes_per_line();
 	void    read_settings();
@@ -73,6 +77,7 @@ signals:
 public slots:
 	void update_preferences(const int, const QFont &);
 	void scroll_changed(int i);
+	void drag_scroll();
 
 };
 

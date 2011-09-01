@@ -12,6 +12,7 @@
 #include <QResizeEvent>
 #include <QCursor>
 #include <QMouseEvent>
+#include <QTimer>
 #include <QScrollBar>
 
 #ifndef QT_NO_DEBUG
@@ -23,6 +24,8 @@ HexWidget::HexWidget(QWidget *parent) :
 	columns(20),rows(20),sel(NULL),
 	mouse_down(false)
 {
+	scroll_timer = new QTimer(this);
+	connect(scroll_timer, SIGNAL(timeout()), this, SLOT(drag_scroll()));
 	setBackgroundRole(QPalette::Base);
 	setAutoFillBackground(true);
 	setEnabled(true);
@@ -229,6 +232,15 @@ QPoint HexWidget::xy_to_grid(QMouseEvent *e)
 	return QPoint(ecol, erow);
 }
 
+void HexWidget::drag_scroll()
+{
+	if (scroll_direction == DOWN) {
+		scrollbar->setSliderPosition(scrollbar->sliderPosition()+scroll_speed);
+	} else {
+		scrollbar->setSliderPosition(scrollbar->sliderPosition()-scroll_speed);
+	}
+}
+
 /******************************************************************************
  *
  *                             Overrides
@@ -316,6 +328,7 @@ void HexWidget::mouseReleaseEvent(QMouseEvent *e)
 		mouse_down = false;
 		if (sel != NULL) {
 			selection(e);
+			scroll_timer->stop();
 			update();
 		}
 		e->accept();
@@ -335,6 +348,20 @@ void HexWidget::mouseMoveEvent(QMouseEvent *e)
 		 * start timer to emit scroll wheel events up or down
 		 * -- decrease interval for increasing distance from widget bounds
 		 */
+		if (e->pos().y() > size().height()) {
+			// scroll down
+			scroll_direction = DOWN;
+			scroll_speed = (e->pos().y() - size().height()) / 25;
+			if (!scroll_timer->isActive())
+				scroll_timer->start(30);
+		} else if (e->pos().y() < 0) {
+			scroll_direction = UP;
+			scroll_speed = (e->pos().y()*-1) / 25;
+			if (!scroll_timer->isActive())
+				scroll_timer->start(30);
+		} else {
+			scroll_timer->stop();
+		}
 	}
 
 }
