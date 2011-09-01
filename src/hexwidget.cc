@@ -20,7 +20,8 @@
 
 HexWidget::HexWidget(QWidget *parent) :
 	QWidget(parent),file(NULL),seek_to(0),
-	columns(20),rows(20),sel(NULL)
+	columns(20),rows(20),sel(NULL),
+	mouse_down(false)
 {
 	setBackgroundRole(QPalette::Base);
 	setAutoFillBackground(true);
@@ -207,12 +208,14 @@ void HexWidget::selection(QMouseEvent *e, bool new_selection=false)
 	if (new_selection) {
 		if (sel != NULL) {
 			delete sel;
+			sel = NULL;
 		}
 		sel = new Selection(columns);
 		sel->start(xy_to_grid(e), seek_to);
 	} else {
 		sel->end(xy_to_grid(e), seek_to);
 	}
+	update();
 }
 
 QPoint HexWidget::xy_to_grid(QMouseEvent *e)
@@ -295,7 +298,12 @@ void HexWidget::wheelEvent(QWheelEvent *e)
 void HexWidget::mousePressEvent(QMouseEvent *e)
 {
 	if (e->button() == Qt::LeftButton) {
-		selection(e, true);
+		if (sel != NULL) {
+			delete sel;
+			sel = NULL;
+			update();
+		}
+		mouse_down = true;
 		e->accept();
 	}
 }
@@ -303,18 +311,20 @@ void HexWidget::mousePressEvent(QMouseEvent *e)
 void HexWidget::mouseReleaseEvent(QMouseEvent *e)
 {
 	if (e->button() == Qt::LeftButton) {
-#ifndef QT_NO_DEBUG
-		qDebug() << "left mouse released";
-#endif
-		selection(e);
-		update();
+		mouse_down = false;
+		if (sel != NULL) {
+			selection(e);
+			update();
+		}
 		e->accept();
 	}
 }
 
 void HexWidget::mouseMoveEvent(QMouseEvent *e)
 {
-	if (sel != NULL) {
+	if (sel == NULL && mouse_down) {
+		selection(e, true);
+	} else if (sel != NULL && mouse_down) {
 		sel->end(xy_to_grid(e), seek_to);
 		update();
 		e->accept();

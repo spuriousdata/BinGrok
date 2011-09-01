@@ -9,6 +9,7 @@
 #include <QByteArray>
 #include <QFont>
 #include <QString>
+#include <QPoint>
 
 class QFile;
 class QPaintEvent;
@@ -49,6 +50,8 @@ private:
 	QByteArray  viewport_data;
 	TrTable     trtable;
 	Selection  *sel;
+	QPoint      mouse_position;
+	bool        mouse_down;
 	QScrollBar *scrollbar;
 
 	off_t   bytes_per_line();
