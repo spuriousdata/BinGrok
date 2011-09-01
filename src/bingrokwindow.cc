@@ -164,7 +164,7 @@ void BinGrokWindow::save_preferences()
 
 	hexwidget->update_preferences(
 					preferences_ui->get_bpc(),
-					preferences_ui->get_font()
+					preferences_ui->get_fontsize()
 				);
 }
 

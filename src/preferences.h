@@ -2,7 +2,6 @@
 #define PREFERENCES_H
 
 #include <QDialog>
-#include <QFont>
 
 namespace Ui {
     class Preferences;
@@ -16,20 +15,18 @@ public:
     explicit Preferences(QWidget *parent = 0);
     ~Preferences();
 	int get_bpc();
-	QFont get_font();
 	quint8 get_mro();
 	void set_mro(quint8);
+	int get_fontsize();
 
 private:
-    Ui::Preferences *ui;
-	QFont parent_font;
-	QFont pref_font;
+	Ui::Preferences *ui;
 
-	QString font_string(const QFont &);
+	//QString font_string(const QFont &);
 
 public slots:
-	void show_font_dialog();
-	void set_font(const QFont &);
+	//void show_font_dialog();
+	//void set_font(const QFont &);
 	void save_preferences();
 
 signals:

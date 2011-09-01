@@ -39,7 +39,10 @@ void HexWidget::read_settings()
 	s.beginGroup("hexview");
 	bytes_per_column = s.value("bytes_per_column", 1).toInt();
 
-	setFont(s.value("font", QFont("Courier")).value<QFont>());
+	QFont f("Courier");
+	f.setStyleHint(QFont::TypeWriter);
+	f.setPointSize(s.value("fontsize", 12).toInt());
+	setFont(f);
 
 	s.endGroup();
 }
@@ -49,7 +52,7 @@ void HexWidget::write_settings()
 	QSettings s;
 	s.beginGroup("hexview");
 	s.setValue("bytes_per_column", bytes_per_column);
-	s.setValue("font", font());
+	s.setValue("fontsize", font().pointSize());
 	s.endGroup();
 }
 
@@ -149,9 +152,11 @@ void HexWidget::update_grid_sizes()
 	rows = size().height() / row_height;
 }
 
-void HexWidget::update_preferences(int bpc, const QFont & f)
+void HexWidget::update_preferences(int bpc, int fsz)
 {
 	bytes_per_column = bpc;
+	QFont f = font();
+	f.setPointSize(fsz);
 	setFont(f);
 
 	write_settings();

@@ -75,7 +75,7 @@ signals:
 	void file_opened(QFile *);
 
 public slots:
-	void update_preferences(const int, const QFont &);
+	void update_preferences(const int, int);
 	void scroll_changed(int i);
 	void drag_scroll();
 
