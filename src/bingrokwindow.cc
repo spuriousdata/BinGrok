@@ -85,6 +85,11 @@ void BinGrokWindow::open()
 		hexwidget->open(filename);
 }
 
+void BinGrokWindow::open_file(const QString &f)
+{
+	hexwidget->open(f);
+}
+
 void BinGrokWindow::open_recent()
 {
 	QAction *a = qobject_cast<QAction *>(sender());

@@ -1,5 +1,6 @@
 #include <QtGui/QApplication>
 #include <QCoreApplication>
+#include <QStringList>
 #include "bingrokwindow.h"
 
 int main(int argc, char *argv[])
@@ -12,6 +13,10 @@ int main(int argc, char *argv[])
 	QCoreApplication::setApplicationName("BinGrok");
 
 	BinGrokWindow w;
+
+	QStringList args = qApp->arguments();
+	if (args.size() > 1)
+		w.open_file(args.at(1));
 
     w.show();
 
