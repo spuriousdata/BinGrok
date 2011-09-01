@@ -13,6 +13,7 @@
 class QFile;
 class QPaintEvent;
 class QMouseEvent;
+class QScrollBar;
 
 class HexWidget : public QWidget
 {
@@ -24,6 +25,7 @@ public:
 	bool open(const QString & filename);
 	bool maybe_save();
 	inline quint8 get_bytes_per_column() { return bytes_per_column; }
+	void set_scrollbar(QScrollBar *s);
 
 protected:
 	void paintEvent(QPaintEvent *e);
@@ -34,19 +36,20 @@ protected:
 	void mouseMoveEvent(QMouseEvent *);
 
 private:
-	quint16    columns;
-	quint16    rows;
-	quint8     bytes_per_column;
-	quint64    seek_to;
-	quint32    bytes_per_page;
-	quint32    scroll_lines;
-	QFile     *file;
-	off_t      cur_offset;
-	int        col_width;
-	int	       row_height;
-	QByteArray viewport_data;
-	TrTable    trtable;
-	Selection *sel;
+	quint16     columns;
+	quint16     rows;
+	quint8      bytes_per_column;
+	quint64     seek_to;
+	quint32     bytes_per_page;
+	quint32     scroll_lines;
+	QFile      *file;
+	off_t       cur_offset;
+	int         col_width;
+	int         row_height;
+	QByteArray  viewport_data;
+	TrTable     trtable;
+	Selection  *sel;
+	QScrollBar *scrollbar;
 
 	off_t   bytes_per_line();
 	void    read_settings();
@@ -62,13 +65,11 @@ private:
 
 
 signals:
-	void update_scroll(off_t, off_t);
 	void file_opened(QFile *);
-	void scroll_wheel_changed(int);
 
 public slots:
 	void update_preferences(const int, const QFont &);
-	void scroll_changed(int);
+	void scroll_changed(int i);
 
 };
 

@@ -48,9 +48,7 @@ public slots:
 	void save_as();
 	void show_preferences();
 	void save_preferences();
-	void update_scroll(off_t, off_t);
 	void add_recently_open(QFile *);
-	void handle_scrollwheel(int);
 };
 
 #endif // MAINWINDOW_H
