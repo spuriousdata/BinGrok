@@ -44,6 +44,7 @@ public slots:
 	void new_file();
 	void open();
 	void open_recent();
+	void open_file(const QString &);
 	void save();
 	void save_as();
 	void show_preferences();
