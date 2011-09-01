@@ -23,6 +23,8 @@ bool Selection::in_range(quint64 x, quint64 y, quint64 tell)
 	quint64 s = start_offset;
 	quint64 e = end_offset;
 
+	if (test >= size) return false;  // can't select outside of file size
+
 	/* user was selecting 'up' instead of 'down' */
 	if (e < s) {
 		quint64 tmp = s;

@@ -215,7 +215,7 @@ void HexWidget::selection(QMouseEvent *e, bool new_selection=false)
 			delete sel;
 			sel = NULL;
 		}
-		sel = new Selection(columns);
+		sel = new Selection(columns, file->size());
 		sel->start(xy_to_grid(e), seek_to);
 	} else {
 		sel->end(xy_to_grid(e), seek_to);

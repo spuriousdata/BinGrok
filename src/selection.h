@@ -6,7 +6,7 @@
 class Selection
 {
 public:
-	Selection(int columns) : columns(columns) {};
+	Selection(int columns, quint64 size) : columns(columns),size(size) {};
 
 	void start(quint64 x, quint64 y, quint64 tell);
 	void start(QPoint p, quint64 tell) { start(p.x(), p.y(), tell); }
@@ -17,7 +17,7 @@ public:
 	bool in_range(quint64 x, quint64 y, quint64 tell);
 
 private:
-	quint64 columns;
+	int columns, size;
 	quint64 start_offset, end_offset;
 
 	quint64 xy_to_offset(quint64 x, quint64 y, quint64 tell);
