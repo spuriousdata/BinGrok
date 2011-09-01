@@ -69,24 +69,12 @@ BinGrokWindow::BinGrokWindow(QWidget *parent) :
 void BinGrokWindow::read_settings()
 {
 	QSettings s;
-#ifndef QT_NO_DEBUG
-	qDebug() << "s.childGroups() = " << s.childGroups();
-#endif
+
 	s.beginGroup("window");
 	resize(s.value("size", QSize(400,400)).toSize());
 	move(s.value("position", QPoint(200,200)).toPoint());
 	max_recently_open = s.value("max_recently_open", 8).toInt();
 
-	/*
-	int sz = s.value("recently_open_size", 0).toInt();
-	s.beginReadArray("recently_open");
-	recently_open.clear();
-	for (int i = 0; i < sz; i++) {
-		s.setArrayIndex(i);
-		recently_open.append(s.value("file").toString());
-	}
-	s.endArray();
-	*/
 	recently_open = s.value("recently_open").toStringList();
 
 	s.endGroup();
@@ -94,9 +82,6 @@ void BinGrokWindow::read_settings()
 
 void BinGrokWindow::handle_scrollwheel(int i)
 {
-#ifndef QT_NO_DEBUG
-	qDebug() << "handle_scrollwheel(" << i << ")";
-#endif
 	if (i > 0)
 		vscroll->triggerAction(QAbstractSlider::SliderSingleStepAdd);
 	else
@@ -190,9 +175,6 @@ void BinGrokWindow::save_preferences()
 
 void BinGrokWindow::update_scroll(off_t s, off_t e)
 {
-#ifndef QT_NO_DEBUG
-	qDebug() << "update_scroll(" << s << ", " << e << ")";
-#endif
 	vscroll->setRange(s, e);
 }
 

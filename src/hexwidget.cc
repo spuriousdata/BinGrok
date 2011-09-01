@@ -239,7 +239,6 @@ void HexWidget::paintEvent(QPaintEvent *e)
 
 			if (sel != NULL) {
 				if (sel->in_range(c, r, seek_to)) {
-					qDebug() << "in_range(" << c << ", " << r << "): true";
 					painter.setBackground(palette.link());
 					painter.setPen(palette.brightText().color());
 				} else {
@@ -277,10 +276,6 @@ void HexWidget::resizeEvent(QResizeEvent *e)
 
 void HexWidget::wheelEvent(QWheelEvent *e)
 {
-#ifndef QT_NO_DEBUG
-	qDebug() << "delta: " << e->delta();
-	qDebug() << "pos: " << e->pos();
-#endif
 	if (e->delta() > 0) {
 		// positive == scroll up
 		emit scroll_wheel_changed(-1);
@@ -294,9 +289,6 @@ void HexWidget::wheelEvent(QWheelEvent *e)
 void HexWidget::mousePressEvent(QMouseEvent *e)
 {
 	if (e->button() == Qt::LeftButton) {
-#ifndef QT_NO_DEBUG
-		qDebug() << "left mouse pressed";
-#endif
 		selection(e, true);
 		e->accept();
 	}
