@@ -163,7 +163,7 @@ void HexWidget::update_viewport_data()
 	}
 
 	file->seek(seek_to);
-	viewport_data = file->read(rows*columns);
+	viewport_data = file->read(rows*columns*bytes_per_column);
 }
 
 
