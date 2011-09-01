@@ -139,8 +139,8 @@ void HexWidget::update_grid_sizes()
 {
 	int cwidth  = fontMetrics().width("0"); // character width
 	int cheight = fontMetrics().height();   // character height
-	col_width = (cwidth * 2 * bytes_per_column) + 10; // 10px space
-	row_height = cheight + 10; // 10px space
+	col_width = (cwidth * 2 * bytes_per_column) + cwidth; //add cwdith again for final space
+	row_height = cheight;
 
 	columns = size().width() / col_width;
 	rows = size().height() / row_height;
@@ -179,6 +179,8 @@ QString HexWidget::get_dataword(quint32 offset)
 			else data.append(trtable.get_hex(viewport_data[x]));
 		}
 	}
+
+	data.append(" "); // for nice column lines
 
 	return data;
 }
