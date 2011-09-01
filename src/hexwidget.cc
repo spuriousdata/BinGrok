@@ -12,6 +12,7 @@
 #include <QResizeEvent>
 #include <QCursor>
 #include <QMouseEvent>
+#include <QScrollBar>
 
 #ifndef QT_NO_DEBUG
 #include <QDebug>
@@ -181,6 +182,13 @@ QString HexWidget::get_dataword(quint32 offset)
 	return data;
 }
 
+void HexWidget::set_scrollbar(QScrollBar *s)
+{
+	scrollbar = s;
+	connect(scrollbar, SIGNAL(valueChanged(int)),
+			this, SLOT(scroll_changed(int)));
+}
+
 void HexWidget::scroll_changed(int i)
 {
 #ifndef QT_NO_DEBUG
@@ -270,18 +278,16 @@ void HexWidget::resizeEvent(QResizeEvent *e)
 #endif
 		bytes_per_page = bytes_per_line() * rows;
 		scroll_lines = ((file->size() - bytes_per_page) / bytes_per_line()) + 1;
-		emit update_scroll(0, scroll_lines);
+		scrollbar->setRange(0, scroll_lines);
 	}
 }
 
 void HexWidget::wheelEvent(QWheelEvent *e)
 {
 	if (e->delta() > 0) {
-		// positive == scroll up
-		emit scroll_wheel_changed(-1);
+		scrollbar->setSliderPosition(scrollbar->sliderPosition()-3);
 	} else {
-		// negative == scroll down
-		emit scroll_wheel_changed(1);
+		scrollbar->setSliderPosition(scrollbar->sliderPosition()+3);
 	}
 	e->accept();
 }
@@ -318,6 +324,7 @@ void HexWidget::mouseMoveEvent(QMouseEvent *e)
 		 * -- decrease interval for increasing distance from widget bounds
 		 */
 	}
+
 }
 
 HexWidget::~HexWidget()
