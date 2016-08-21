@@ -1,1 +1,3 @@
 BinGrok.pro.user
+ui_*.h
+moc_*
