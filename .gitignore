@@ -1,3 +1,5 @@
-BinGrok.pro.user
+BinGrok-build*
+BinGrok.pro.user*
+.directory
 ui_*.h
 moc_*
