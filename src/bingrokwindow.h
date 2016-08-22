@@ -6,6 +6,7 @@
 
 class QString;
 class HexWidget;
+class TxtDisplayWidget;
 class QScrollBar;
 class QFile;
 class QWidget;
@@ -29,6 +30,7 @@ private:
 	Ui::BinGrokWindow *ui;
 	Preferences *preferences_ui;
 	HexWidget *hexwidget;
+    TxtDisplayWidget *txtdisplaywidget;
 	QScrollBar *vscroll;
 	QWidget *container;
 	QHBoxLayout *layout;

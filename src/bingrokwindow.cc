@@ -1,6 +1,7 @@
 #include "bingrokwindow.h"
 #include "ui_bingrokwindow.h"
 #include "hexwidget.h"
+#include "txtdisplaywidget.h"
 #include "preferences.h"
 #include "unistd.h"
 
@@ -32,13 +33,19 @@ BinGrokWindow::BinGrokWindow(QWidget *parent) :
     ui->setupUi(this);
 
 	hexwidget = new HexWidget(container);
-	hexwidget->setSizePolicy(QSizePolicy(
-								 QSizePolicy::Expanding,
-								 QSizePolicy::Expanding
-								 )
-							 );
-
+    QSizePolicy p1(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    p1.setHorizontalStretch(3); // stretch factor 3 (one byte takes up 3 columns including it's space)
+    hexwidget->setSizePolicy(p1);
 	layout->addWidget(hexwidget);
+
+    txtdisplaywidget = new TxtDisplayWidget(container);
+    QSizePolicy p2(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    p2.setHorizontalStretch(1); // stretch factor 1 (one byte takes up 1 column -- no spaces)
+    txtdisplaywidget->setSizePolicy(p2);
+
+    layout->addWidget(txtdisplaywidget);
+    hexwidget->set_txtdisplay(txtdisplaywidget);
+
 	vscroll = new QScrollBar(container);
 	layout->addWidget(vscroll);
 	vscroll->setRange(0,0);
@@ -55,8 +62,8 @@ BinGrokWindow::BinGrokWindow(QWidget *parent) :
 	connect(ui->action_Preferences, SIGNAL(triggered()),
 			this, SLOT(show_preferences()));
 
-	connect(hexwidget, SIGNAL(update_scroll(off_t,off_t)),
-			this, SLOT(update_scroll(off_t,off_t)));
+    /*connect(hexwidget, SIGNAL(update_scroll(off_t,off_t)),
+            this, SLOT(update_scroll(off_t,off_t)));*/
 	connect(hexwidget, SIGNAL(file_opened(QFile*)),
 			this, SLOT(add_recently_open(QFile*)));
 

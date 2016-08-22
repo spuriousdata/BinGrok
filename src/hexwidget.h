@@ -16,6 +16,7 @@ class QPaintEvent;
 class QMouseEvent;
 class QTimer;
 class QScrollBar;
+class TxtDisplayWidget;
 
 class HexWidget : public QWidget
 {
@@ -28,6 +29,8 @@ public:
 	bool maybe_save();
 	inline quint8 get_bytes_per_column() { return bytes_per_column; }
 	void set_scrollbar(QScrollBar *s);
+    void set_txtdisplay(TxtDisplayWidget *t);
+    bool get_display_textview() { return display_textview; }
 
 protected:
 	void paintEvent(QPaintEvent *e);
@@ -57,6 +60,8 @@ private:
 	QScrollBar *scrollbar;
 	enum SCROLL_DIRECTION { UP=0, DOWN=2 } scroll_direction;
 	quint8      scroll_speed;
+    TxtDisplayWidget *txtdisplay;
+    bool display_textview;
 
 	off_t   bytes_per_line();
 	void    read_settings();
@@ -73,11 +78,13 @@ private:
 
 signals:
 	void file_opened(QFile *);
+    void updating();
 
 public slots:
 	void update_preferences(const int, int);
 	void scroll_changed(int i);
 	void drag_scroll();
+    void update();
 
 };
 

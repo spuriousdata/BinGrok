@@ -1,15 +1,25 @@
 #include "selection.h"
 #include <QPoint>
 
+#ifndef QT_NO_DEBUG
+#include <QtDebug>
+#endif
+
 void Selection::start(int x, int y, quint64 tell)
 {
 	start_offset = xy_to_offset(x, y, tell);
 	end_offset = start_offset;
+#ifndef QT_NO_DEBUG
+    qDebug() << "Selection::start(" << start_offset << ", " << end_offset << ")";
+#endif
 }
 
 void Selection::end(int x, int y, quint64 tell)
 {
 	end_offset = xy_to_offset(x, y, tell);
+#ifndef QT_NO_DEBUG
+    qDebug() << "Selection::end(" << start_offset << ", " << end_offset << ")";
+#endif
 }
 
 quint64 Selection::xy_to_offset(int x, int y, quint64 tell)

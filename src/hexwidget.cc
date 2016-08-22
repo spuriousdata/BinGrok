@@ -1,5 +1,6 @@
 #include "hexwidget.h"
 #include "trtable.h"
+#include "txtdisplaywidget.h"
 
 #include <QSettings>
 #include <QMessageBox>
@@ -21,16 +22,25 @@
 
 HexWidget::HexWidget(QWidget *parent) :
 	QWidget(parent),file(NULL),seek_to(0),
-	columns(20),rows(20),sel(NULL),
-	mouse_down(false)
+    columns(20),rows(20),sel(NULL),
+    txtdisplay(NULL), mouse_down(false)
 {
 	scroll_timer = new QTimer(this);
-	connect(scroll_timer, SIGNAL(timeout()), this, SLOT(drag_scroll()));
+    connect(scroll_timer, &QTimer::timeout, this, &HexWidget::drag_scroll);
 	setBackgroundRole(QPalette::Base);
 	setAutoFillBackground(true);
 	setEnabled(true);
 	setCursor(Qt::IBeamCursor);
 	read_settings();
+}
+
+void HexWidget::set_txtdisplay(TxtDisplayWidget *t)
+{
+    txtdisplay = t;
+    txtdisplay->set_viewport_data(&viewport_data);
+    txtdisplay->set_trtable(&trtable);
+    txtdisplay->set_seek_to(&seek_to);
+    connect(this, SIGNAL(updating()), txtdisplay, SLOT(update()));
 }
 
 void HexWidget::read_settings()
@@ -75,7 +85,7 @@ bool HexWidget::open(const QString & filename)
 	emit file_opened(file);
 
 	trigger_resizeEvent();
-	update();
+    update();
 	return true;
 }
 
@@ -85,13 +95,14 @@ void HexWidget::new_file()
 		return;
 	close();
 	trigger_resizeEvent();
-	update();
+    update();
 }
 
 void HexWidget::trigger_resizeEvent()
 {
 	QResizeEvent *e = new QResizeEvent(size(), size());
 	resizeEvent(e);
+    txtdisplay->trigger_resizeEvent();
 	delete e;
 }
 
@@ -109,7 +120,7 @@ bool HexWidget::maybe_save()
 	/*
 	if (file not modified)
 		return true;
-	*/
+
 
 	QString warning = "Save before closing \"" + file->fileName() + "\"?";
 	int s = QMessageBox::warning(this, "File Modified", warning,
@@ -122,6 +133,7 @@ bool HexWidget::maybe_save()
 
 	if (s == QMessageBox::Yes)
 		save();
+    */
 
 	return true;
 }
@@ -207,7 +219,7 @@ void HexWidget::scroll_changed(int i)
 #endif
 	seek_to = i * bytes_per_line();
 	update_viewport_data();
-	update();
+    update();
 }
 
 void HexWidget::selection(QMouseEvent *e, bool new_selection=false)
@@ -219,13 +231,15 @@ void HexWidget::selection(QMouseEvent *e, bool new_selection=false)
 		if (sel != NULL) {
 			delete sel;
 			sel = NULL;
+            txtdisplay->set_selection(NULL);
 		}
 		sel = new Selection(columns, file->size());
+        txtdisplay->set_selection(sel);
 		sel->start(xy_to_grid(e), seek_to);
 	} else {
 		sel->end(xy_to_grid(e), seek_to);
 	}
-	update();
+    update();
 }
 
 QPoint HexWidget::xy_to_grid(QMouseEvent *e)
@@ -316,15 +330,16 @@ void HexWidget::wheelEvent(QWheelEvent *e)
 
 void HexWidget::mousePressEvent(QMouseEvent *e)
 {
-	if (e->button() == Qt::LeftButton) {
-		if (sel != NULL) {
-			delete sel;
-			sel = NULL;
-			update();
-		}
-		mouse_down = true;
-		e->accept();
-	}
+    if (e->button() == Qt::LeftButton) {
+        if (sel != NULL) {
+            delete sel;
+            sel = NULL;
+            txtdisplay->set_selection(NULL);
+            update();
+        }
+        mouse_down = true;
+        e->accept();
+    }
 }
 
 void HexWidget::mouseReleaseEvent(QMouseEvent *e)
@@ -332,9 +347,9 @@ void HexWidget::mouseReleaseEvent(QMouseEvent *e)
 	if (e->button() == Qt::LeftButton) {
 		mouse_down = false;
 		if (sel != NULL) {
-			selection(e);
+            selection(e, false);
 			scroll_timer->stop();
-			update();
+            update();
 		}
 		e->accept();
 	}
@@ -346,7 +361,7 @@ void HexWidget::mouseMoveEvent(QMouseEvent *e)
 		selection(e, true);
 	} else if (sel != NULL && mouse_down) {
 		sel->end(xy_to_grid(e), seek_to);
-		update();
+        update();
 		e->accept();
 
 		/* if moved below or above widget bounds
@@ -368,7 +383,12 @@ void HexWidget::mouseMoveEvent(QMouseEvent *e)
 			scroll_timer->stop();
 		}
 	}
+}
 
+void HexWidget::update()
+{
+    QWidget::update();
+    emit updating();
 }
 
 HexWidget::~HexWidget()
