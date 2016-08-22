@@ -3,6 +3,7 @@
 #include "hexwidget.h"
 #include "txtdisplaywidget.h"
 #include "preferences.h"
+#include "structeditor.h"
 #include "unistd.h"
 
 #include <QSettings>
@@ -25,7 +26,8 @@
 BinGrokWindow::BinGrokWindow(QWidget *parent) :
     QMainWindow(parent),
 	ui(new Ui::BinGrokWindow),
-	preferences_ui(NULL)
+    preferences_ui(NULL),
+    structeditor_ui(NULL)
 {
 	container = new QWidget(this);
 	layout = new QHBoxLayout(container);
@@ -59,11 +61,9 @@ BinGrokWindow::BinGrokWindow(QWidget *parent) :
 	connect(ui->action_Open, SIGNAL(triggered()), this, SLOT(open()));
 	connect(ui->action_Save, SIGNAL(triggered()), this, SLOT(save()));
 	connect(ui->action_SaveAs, SIGNAL(triggered()), this, SLOT(save_as()));
-	connect(ui->action_Preferences, SIGNAL(triggered()),
-			this, SLOT(show_preferences()));
+    connect(ui->action_Preferences, SIGNAL(triggered()), this, SLOT(show_preferences()));
+    connect(ui->action_Struct_Editor, SIGNAL(triggered()), this, SLOT(show_struct_editor()));
 
-    /*connect(hexwidget, SIGNAL(update_scroll(off_t,off_t)),
-            this, SLOT(update_scroll(off_t,off_t)));*/
 	connect(hexwidget, SIGNAL(file_opened(QFile*)),
 			this, SLOT(add_recently_open(QFile*)));
 
@@ -163,6 +163,14 @@ void BinGrokWindow::show_preferences()
 				this, SLOT(save_preferences()));
 	}
 	preferences_ui->show();
+}
+
+void BinGrokWindow::show_struct_editor()
+{
+    if (structeditor_ui == NULL) {
+        structeditor_ui = new StructEditor(this);
+    }
+    structeditor_ui->show();
 }
 
 void BinGrokWindow::save_preferences()

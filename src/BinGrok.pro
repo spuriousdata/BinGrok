@@ -17,7 +17,9 @@ SOURCES += \
     trtable.cc \
     preferences.cc \
     selection.cc \
-    txtdisplaywidget.cc
+    txtdisplaywidget.cc \
+    structeditor.cc \
+    syntaxhighlighter.cc
 
 HEADERS  += \
     bingrokwindow.h \
@@ -25,7 +27,9 @@ HEADERS  += \
     trtable.h \
     preferences.h \
     selection.h \
-    txtdisplaywidget.h
+    txtdisplaywidget.h \
+    structeditor.h \
+    syntaxhighlighter.h
 
 FORMS    += \
     bingrokwindow.ui \

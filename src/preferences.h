@@ -22,11 +22,7 @@ public:
 private:
 	Ui::Preferences *ui;
 
-	//QString font_string(const QFont &);
-
 public slots:
-	//void show_font_dialog();
-	//void set_font(const QFont &);
 	void save_preferences();
 
 signals:

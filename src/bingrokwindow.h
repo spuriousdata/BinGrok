@@ -13,6 +13,7 @@ class QWidget;
 class QHBoxLayout;
 
 class Preferences;
+class StructEditor;
 
 namespace Ui {
 	class BinGrokWindow;
@@ -29,6 +30,7 @@ public:
 private:
 	Ui::BinGrokWindow *ui;
 	Preferences *preferences_ui;
+    StructEditor *structeditor_ui;
 	HexWidget *hexwidget;
     TxtDisplayWidget *txtdisplaywidget;
 	QScrollBar *vscroll;
@@ -50,6 +52,7 @@ public slots:
 	void save();
 	void save_as();
 	void show_preferences();
+    void show_struct_editor();
 	void save_preferences();
 	void add_recently_open(QFile *);
 };
