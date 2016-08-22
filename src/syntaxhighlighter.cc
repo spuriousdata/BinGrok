@@ -17,13 +17,18 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument *parent) :
 
     QStringList keyword_patterns;
     keyword_patterns << RE_B("char") << RE_B("int") << RE_B("uint") << RE_B("struct")
-                     << RE_B("repeat") << RE_B("string") << RE_B("decimal");
+                     << RE_B("uchar") << RE_B("repeat") << RE_B("string") << RE_B("decimal");
 
     foreach (const QString &pattern, keyword_patterns) {
         rule.pattern = QRegExp(pattern);
         rule.format = keyword_format;
         highlighting_rules.append(rule);
     }
+
+    integer_format.setForeground(Qt::green);
+    rule.pattern = QRegExp("[0-9]+");
+    rule.format = integer_format;
+    highlighting_rules.append(rule);
 
     single_line_comment_format.setForeground(Qt::red);
     rule.pattern = QRegExp("//[^\n]*");

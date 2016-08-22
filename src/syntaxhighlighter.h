@@ -34,6 +34,7 @@ private:
     QTextCharFormat keyword_format;
     QTextCharFormat single_line_comment_format;
     QTextCharFormat multiline_comment_format;
+    QTextCharFormat integer_format;
 };
 
 #endif // SYNTAXHIGHLIGHTER_H
