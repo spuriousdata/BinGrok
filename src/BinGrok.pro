@@ -29,4 +29,5 @@ HEADERS  += \
 
 FORMS    += \
     bingrokwindow.ui \
-    preferences.ui
+    preferences.ui \
+    structeditor.ui
