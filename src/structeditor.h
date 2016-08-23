@@ -2,7 +2,9 @@
 #define STRUCTEDITOR_H
 
 #include <QDialog>
+#include <QList>
 #include "syntaxhighlighter.h"
+#include "structtypes.h"
 
 namespace Ui {
     class StructEditor;
@@ -19,6 +21,10 @@ public:
 private:
     Ui::StructEditor *ui;
     SyntaxHighlighter *highlighter;
+    QList<StructStatement*> structs;
+
+public slots:
+    void apply_struct();
 };
 
 #endif // STRUCTEDITOR_H

@@ -9,7 +9,6 @@ QT       += core gui widgets
 TARGET = BinGrok
 TEMPLATE = app
 
-
 SOURCES += \
     bingrokwindow.cc \
     main.cc \
@@ -19,7 +18,9 @@ SOURCES += \
     selection.cc \
     txtdisplaywidget.cc \
     structeditor.cc \
-    syntaxhighlighter.cc
+    syntaxhighlighter.cc \
+    structtypes.cc \
+    rd_parser.cc
 
 HEADERS  += \
     bingrokwindow.h \
@@ -29,7 +30,9 @@ HEADERS  += \
     selection.h \
     txtdisplaywidget.h \
     structeditor.h \
-    syntaxhighlighter.h
+    syntaxhighlighter.h \
+    structtypes.h \
+    rd_parser.h
 
 FORMS    += \
     bingrokwindow.ui \
