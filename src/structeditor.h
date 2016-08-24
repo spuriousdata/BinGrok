@@ -25,6 +25,8 @@ private:
 
 public slots:
     void apply_struct();
+    void close_and_apply();
+    //void close();
 };
 
 #endif // STRUCTEDITOR_H

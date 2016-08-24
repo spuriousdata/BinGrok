@@ -1,8 +1,13 @@
-#include <string>
-#include <QException>
+#ifndef RD_PARSER_H
+#define RD_PARSER_H
+
+#include <QString>
+#include <QTextStream>
+#include <initializer_list>
 
 
 typedef enum {
+    theend,
     identifier,
     number,
     stringsym,
@@ -17,31 +22,50 @@ typedef enum {
     ucharsym,
     floatsym,
     semicolon,
-    comma
+    comma,
+    colon,
+    unknown
 } Symbol;
 
 class RDParser
 {
 public:
-    Symbol symbol;
-    std::string data;
-    std::string token;
-    unsigned long offset = 0;
+    struct {
+        Symbol symbol;
+        QString token;
+    } current;
+    QString data;
+    QTextStream *datastream;
 
-    void parse(std::string & input);
 
-    class ParserException : QException
+    void parse(const QString &input);
+
+    class ParserException
     {
     public:
-        ParserException(QString m) : message(m) {}
         QString message;
+
+        ParserException(QString m) { message = m; }
+
     };
 
 private:
-    int expect(Symbol s);
-    int accept(Symbol s);
-    std::string nextsym();
+    QChar peek();
+    Symbol peek_symbol();
+    bool at_boundary(QChar c);
+    bool expect(Symbol s);
+    bool accept(Symbol s);
+    bool one_of(std::initializer_list<Symbol> s);
+    void nextsym();
     void _struct();
     void block();
     void statements();
+    void statement();
+    void precision();
+    void float_precision();
+    Symbol string_to_symbol(const QString & token);
 };
+
+bool is_word_char(QChar c);
+
+#endif

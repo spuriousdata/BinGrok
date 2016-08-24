@@ -1,4 +1,7 @@
-#include <string>
+#include <QString>
+#include <QTextStream>
+#include <QRegularExpression>
+#include <initializer_list>
 #include "rd_parser.h"
 
 #ifndef QT_NO_DEBUG
@@ -6,10 +9,10 @@
 #include <QString>
 #endif
 
-void RDParser::parse(std::string & input)
+void RDParser::parse(const QString &input)
 {
-	data = input;
-
+    data = QString(input);
+    datastream = new QTextStream(&data);
     nextsym();
     _struct();
 }
@@ -18,6 +21,8 @@ void RDParser::_struct()
 {
     expect(structsym);
     block();
+    expect(identifier);
+    expect(semicolon);
 }
 
 void RDParser::block()
@@ -25,63 +30,185 @@ void RDParser::block()
     expect(lcurly);
     statements();
     expect(rcurly);
-    expect(identifier);
-    expect(semicolon);
 }
 
 void RDParser::statements()
 {
-    if (accept(intsym) || accept(uintsym) || accept(charsym) || accept(ucharsym) || accept(stringsym)) {
-        expect(lparen);
-        expect(number);
-        expect(rparen);
+    while (current.symbol != rcurly)
+        statement();
+}
+
+void RDParser::precision()
+{
+    bool p;
+
+    expect(lparen);
+    p = accept(number);
+    if (!p) {
+        expect(colon);
+        expect(identifier);
+    }
+    expect(rparen);
+}
+
+void RDParser::float_precision()
+{
+    expect(lparen);
+    expect(number);
+    expect(comma);
+    expect(number);
+    expect(comma);
+    expect(number);
+    expect(rparen);
+}
+
+bool RDParser::one_of(std::initializer_list<Symbol> s)
+{
+    for (auto it = s.begin(); it != s.end(); it++)
+        if (accept(*it))
+            return true;
+    return false;
+}
+
+void RDParser::statement()
+{
+    if (one_of({intsym, uintsym, charsym, ucharsym, stringsym})) {
+        precision();
+        expect(identifier);
+        expect(semicolon);
     } else if (accept(floatsym)) {
-        expect(lparen);
-        expect(number);
-        expect(comma);
-        expect(number);
-        expect(comma);
-        expect(number);
-        expect(rparen);
+        float_precision();
+        expect(identifier);
+        expect(semicolon);
     } else {
         _struct();
     }
 }
 
-int RDParser::accept(Symbol s)
+bool RDParser::accept(Symbol s)
 {
-    if (symbol == s) {
+    if (current.symbol == s) {
         nextsym();
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 
-int RDParser::expect(Symbol s)
+bool RDParser::expect(Symbol s)
 {
     if (accept(s))
-        return 1;
+        return true;
     throw new RDParser::ParserException("Unknown symbol.");
-    return 0;
 }
 
-std::string RDParser::nextsym()
+QChar RDParser::peek()
 {
-    unsigned long next_space;
-#ifndef QT_NO_DEBUG
-    qDebug() << "Offset: " << offset << "Length: " << data.length();
-#endif
-	if (offset >= data.length()) {
-        return "";
-	}
+    QString c;
+    qint64 p = datastream->pos();
+    c = datastream->read(1);
+    datastream->seek(p);
+    return c.at(0);
+}
 
-    next_space = data.find_first_of(" \t\n", offset);
+// XXX: This sucks
+Symbol RDParser::peek_symbol()
+{
+    Symbol s,n;
+    QString t;
+    qint64 p;
 
-    token = data.substr(offset, next_space-offset);
+    // save state
+    s = current.symbol;
+    t = current.token;
+    p = datastream->pos();
 
-    offset += next_space + 1;
-#ifndef QT_NO_DEBUG
-    qDebug() << "Token: " << QString().fromStdString(token);
-#endif 
-    return token;
+    nextsym();
+
+    n = current.symbol;
+
+    // reset state
+    current.symbol = s;
+    current.token = t;
+    datastream->seek(p);
+
+    return n;
+}
+
+bool RDParser::at_boundary(QChar c)
+{
+    QChar n = peek();
+    return (!((is_word_char(c) == is_word_char(n)) && (c.isSpace() == n.isSpace())) || (c.isPunct() && n.isPunct()));
+}
+
+bool is_word_char(QChar c)
+{
+    return (c.isLetterOrNumber() || c == '_');
+}
+
+Symbol RDParser::string_to_symbol(const QString & token)
+{
+    QRegularExpression number_re = QRegularExpression("\\d+");
+    QRegularExpression ident_re  = QRegularExpression("^[a-zA-Z_]\\w+");
+
+    if (token == "")
+        return theend;
+    if (token == "struct")
+        return structsym;
+    if (token == "{")
+        return lcurly;
+    if (token == "}")
+        return rcurly;
+    if (token == "(")
+        return lparen;
+    if (token == ")")
+        return rparen;
+    if (token == "int")
+        return intsym;
+    if (token == "uint")
+        return uintsym;
+    if (token == "char")
+        return charsym;
+    if (token == "uchar")
+        return ucharsym;
+    if (token == "float")
+        return floatsym;
+    if (token == "string")
+        return stringsym;
+    if (token == ";")
+        return semicolon;
+    if (token == ",")
+        return comma;
+    if (token == ":")
+        return colon;
+    if (number_re.match(token).hasMatch())
+        return number;
+    if (ident_re.match(token).hasMatch())
+        return identifier;
+    return unknown;
+}
+
+void RDParser::nextsym()
+{
+    QChar c;
+    QString token;
+
+    *datastream >> c;
+    if (!datastream->atEnd()) {
+        // eat whitespace
+        while (c.isSpace())
+            *datastream >> c;
+    }
+
+    while (!datastream->atEnd()) {
+        token.append(c);
+        if (at_boundary(c))
+            break;
+        *datastream >> c;
+    }
+
+    if (!c.isNull() && token.isEmpty())
+        token.append(c);
+
+    current.symbol = string_to_symbol(token);
+    current.token = token;
 }
