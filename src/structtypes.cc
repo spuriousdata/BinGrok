@@ -1,17 +1,27 @@
 #include "structtypes.h"
-#include <QList>
 
-unsigned int StructStatement::record_length()
+QString StructStatement::get_name()
 {
-    unsigned int mysize = 0;
-    for (QList<StructStatement*>::Iterator i = statements.begin(); i != statements.end(); i++)
-        mysize += (*i)->record_length();
-    return mysize;
+    return name;
 }
 
-unsigned int FloatStatement::record_length()
+QString FloatStatement::get_name()
 {
-    unsigned int mysize = (sign_bits * exponent_bits * mantissa_bits);
-    mysize += StructStatement::record_length();
-    return mysize;
+    return name;
 }
+
+QString NumericStatement::get_name()
+{
+    return name;
+}
+
+QString StringStatement::get_name()
+{
+    return name;
+}
+
+QString Struct::get_name()
+{
+    return name;
+}
+

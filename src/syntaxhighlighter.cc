@@ -16,8 +16,8 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument *parent) :
     keyword_format.setFontWeight(QFont::Bold);
 
     QStringList keyword_patterns;
-    keyword_patterns << RE_B("char") << RE_B("int") << RE_B("uint") << RE_B("struct")
-                     << RE_B("uchar") << RE_B("repeat") << RE_B("string") << RE_B("decimal");
+    keyword_patterns << RE_B("int") << RE_B("uint") << RE_B("struct")
+                     << RE_B("array") << RE_B("string") << RE_B("float");
 
     foreach (const QString &pattern, keyword_patterns) {
         rule.pattern = QRegExp(pattern);

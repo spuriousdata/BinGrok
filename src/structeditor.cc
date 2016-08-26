@@ -2,9 +2,11 @@
 #include "ui_structeditor.h"
 #include "syntaxhighlighter.h"
 #include "rd_parser.h"
+#include "structtypes.h"
 
 #include <QDialogButtonBox>
 #include <QErrorMessage>
+#include <QException>
 #include <QPushButton>
 #include <string>
 
@@ -13,7 +15,8 @@ extern void parse(std::string & in);
 
 StructEditor::StructEditor(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::StructEditor)
+    ui(new Ui::StructEditor),
+    error_window(new QMessageBox)
 {
     ui->setupUi(this);
     highlighter = new SyntaxHighlighter(ui->struct_textedit->document());
@@ -28,6 +31,7 @@ StructEditor::StructEditor(QWidget *parent) :
 StructEditor::~StructEditor()
 {
     delete ui;
+    delete error_window;
 }
 
 void StructEditor::close_and_apply()
@@ -40,10 +44,13 @@ void StructEditor::apply_struct()
 {
     QString data = ui->struct_textedit->document()->toPlainText();
     RDParser r;
+    Struct *s;
     try {
-        r.parse(data);
+        s = r.parse(data);
     } catch (RDParser::ParserException &e) {
-        QErrorMessage m(this);
-        m.showMessage(e.message);
+        error_window->setWindowTitle("Parse Error");
+        error_window->setWindowFlags(Qt::WindowStaysOnTopHint);
+        error_window->setText(e.message);
+        error_window->show();
     }
 }

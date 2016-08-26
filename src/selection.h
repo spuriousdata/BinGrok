@@ -6,7 +6,7 @@
 class Selection
 {
 public:
-    Selection(int columns, quint64 size) : columns(columns),size(size) {}
+    Selection(uint columns, quint64 size) : columns(columns),size(size) {}
 
 	void start(int x, int y, quint64 tell);
 	void start(QPoint p, quint64 tell) { start(p.x(), p.y(), tell); }

@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QList>
+#include <QMessageBox>
 #include "syntaxhighlighter.h"
 #include "structtypes.h"
 
@@ -22,6 +23,7 @@ private:
     Ui::StructEditor *ui;
     SyntaxHighlighter *highlighter;
     QList<StructStatement*> structs;
+    QMessageBox *error_window;
 
 public slots:
     void apply_struct();

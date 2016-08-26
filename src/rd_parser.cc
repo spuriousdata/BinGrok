@@ -1,64 +1,80 @@
-#include <QString>
-#include <QTextStream>
-#include <QRegularExpression>
-#include <initializer_list>
 #include "rd_parser.h"
 
 #ifndef QT_NO_DEBUG
 #include <QtDebug>
-#include <QString>
 #endif
 
-void RDParser::parse(const QString &input)
+Struct *RDParser::parse(const QString &input)
 {
     data = QString(input);
     datastream = new QTextStream(&data);
     nextsym();
-    _struct();
+    return _struct();
 }
 
-void RDParser::_struct()
+Struct *RDParser::_struct()
 {
+    Struct *s = new Struct();
+    s->type = "struct";
+
     expect(structsym);
-    block();
-    expect(identifier);
+    block(s);
+    expect(identifier, &(s->name));
     expect(semicolon);
+
+    return s;
 }
 
-void RDParser::block()
+void RDParser::block(Struct *container)
 {
     expect(lcurly);
-    statements();
+    statements(&(container->statements));
     expect(rcurly);
 }
 
-void RDParser::statements()
+void RDParser::statements(QList<StructStatement *> *container)
 {
-    while (current.symbol != rcurly)
-        statement();
+    while (next.symbol != rcurly) {
+        container->append(statement());
+    }
 }
 
-void RDParser::precision()
+void RDParser::precision(NumericStatement *container)
 {
-    bool p;
+    QString val;
 
     expect(lparen);
-    p = accept(number);
-    if (!p) {
-        expect(colon);
-        expect(identifier);
-    }
+    accept(number, &val);
+    container->precision_bits = val.toUInt();
     expect(rparen);
 }
 
-void RDParser::float_precision()
+void RDParser::string_length(StringStatement *container)
 {
+    QString bytes;
+    expect(lbracket);
+    if (accept(colon)) {
+        expect(identifier, &container->length_backref);
+    } else {
+        expect(number, &bytes);
+        container->length_bytes = bytes.toUInt();
+    }
+    expect(rbracket);
+}
+
+void RDParser::float_precision(FloatStatement *container)
+{
+    QString val;
+
     expect(lparen);
-    expect(number);
+    expect(number, &val);
+    container->sign_bits = val.toUInt();
     expect(comma);
-    expect(number);
+    expect(number, &val);
+    container->exponent_bits = val.toUInt();
     expect(comma);
-    expect(number);
+    expect(number, &val);
+    container->mantissa_bits = val.toUInt();
     expect(rparen);
 }
 
@@ -70,35 +86,65 @@ bool RDParser::one_of(std::initializer_list<Symbol> s)
     return false;
 }
 
-void RDParser::statement()
+StructStatement *RDParser::statement()
 {
-    if (one_of({intsym, uintsym, charsym, ucharsym, stringsym})) {
-        precision();
-        expect(identifier);
+    QString name;
+    StructStatement *ss = new StructStatement();
+    bool try_struct = false;
+
+    if (accept(intsym)) {
+        ss = new NumericStatement();
+        precision(static_cast<NumericStatement*>(ss));
+        expect(identifier, &name);
+        expect(semicolon);
+    } else if (accept(uintsym)) {
+        ss = new NumericStatement();
+        precision(static_cast<NumericStatement*>(ss));
+        static_cast<NumericStatement*>(ss)->is_unsigned = true;
+        expect(identifier, &name);
+        expect(semicolon);
+    } else if (one_of({stringsym, arraysym})) {
+        ss = new StringStatement();
+        string_length(static_cast<StringStatement*>(ss));
+        expect(identifier, &name);
         expect(semicolon);
     } else if (accept(floatsym)) {
-        float_precision();
-        expect(identifier);
+        ss = new FloatStatement();
+        float_precision(static_cast<FloatStatement*>(ss));
+        expect(identifier, &name);
         expect(semicolon);
     } else {
-        _struct();
+       try_struct = true;
+    }
+
+    if (try_struct) {
+        return _struct();
+    } else {
+        ss->name = name;
+        return ss;
     }
 }
 
-bool RDParser::accept(Symbol s)
+bool RDParser::accept(Symbol s, QString *ret)
 {
-    if (current.symbol == s) {
+    if (next.symbol == s) {
+        if (ret != nullptr)
+            *ret = next.token;
         nextsym();
         return true;
     }
     return false;
 }
 
-bool RDParser::expect(Symbol s)
+bool RDParser::expect(Symbol s, QString *ret)
 {
-    if (accept(s))
+    if (accept(s, ret))
         return true;
-    throw new RDParser::ParserException("Unknown symbol.");
+    QString message;
+    QTextStream(&message) << "Got '" << next.token << "' expected '" << s << "'";
+    auto ex = RDParser::ParserException();
+    ex.set_message(message);
+    throw ex;
 }
 
 QChar RDParser::peek()
@@ -118,17 +164,17 @@ Symbol RDParser::peek_symbol()
     qint64 p;
 
     // save state
-    s = current.symbol;
-    t = current.token;
+    s = next.symbol;
+    t = next.token;
     p = datastream->pos();
 
     nextsym();
 
-    n = current.symbol;
+    n = next.symbol;
 
     // reset state
-    current.symbol = s;
-    current.token = t;
+    next.symbol = s;
+    next.token = t;
     datastream->seek(p);
 
     return n;
@@ -137,7 +183,8 @@ Symbol RDParser::peek_symbol()
 bool RDParser::at_boundary(QChar c)
 {
     QChar n = peek();
-    return (!((is_word_char(c) == is_word_char(n)) && (c.isSpace() == n.isSpace())) || (c.isPunct() && n.isPunct()));
+    /* each punct symbol should be treated separately, so we treat them as word boundaries */
+    return (!((is_word_char(c) == is_word_char(n)) && (c.isSpace() == n.isSpace())) || c.isPunct() || n.isPunct());
 }
 
 bool is_word_char(QChar c)
@@ -147,8 +194,7 @@ bool is_word_char(QChar c)
 
 Symbol RDParser::string_to_symbol(const QString & token)
 {
-    QRegularExpression number_re = QRegularExpression("\\d+");
-    QRegularExpression ident_re  = QRegularExpression("^[a-zA-Z_]\\w+");
+
 
     if (token == "")
         return theend;
@@ -162,18 +208,20 @@ Symbol RDParser::string_to_symbol(const QString & token)
         return lparen;
     if (token == ")")
         return rparen;
+    if (token == "[")
+        return lbracket;
+    if (token == "]")
+        return rbracket;
     if (token == "int")
         return intsym;
     if (token == "uint")
         return uintsym;
-    if (token == "char")
-        return charsym;
-    if (token == "uchar")
-        return ucharsym;
     if (token == "float")
         return floatsym;
     if (token == "string")
         return stringsym;
+    if (token == "array")
+        return arraysym;
     if (token == ";")
         return semicolon;
     if (token == ",")
@@ -209,6 +257,16 @@ void RDParser::nextsym()
     if (!c.isNull() && token.isEmpty())
         token.append(c);
 
-    current.symbol = string_to_symbol(token);
-    current.token = token;
+    next.symbol = string_to_symbol(token);
+    next.token = token;
+}
+
+void RDParser::ParserException::raise() const
+{
+    throw *this;
+}
+
+void RDParser::ParserException::set_message(QString m)
+{
+    message = m;
 }

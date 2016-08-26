@@ -3,27 +3,32 @@
 
 #include <QString>
 #include <QTextStream>
+#include <QRegularExpression>
+#include <QList>
+#include <QException>
 #include <initializer_list>
+#include "structtypes.h"
 
 
 typedef enum {
-    theend,
     identifier,
-    number,
-    stringsym,
-    structsym,
     lcurly,
     rcurly,
     lparen,
     rparen,
+    lbracket,
+    rbracket,
+    number,
+    stringsym,
+    arraysym,
+    structsym,
     intsym,
     uintsym,
-    charsym,
-    ucharsym,
     floatsym,
     semicolon,
     comma,
     colon,
+    theend,
     unknown
 } Symbol;
 
@@ -33,36 +38,42 @@ public:
     struct {
         Symbol symbol;
         QString token;
-    } current;
+    } next;
     QString data;
     QTextStream *datastream;
 
 
-    void parse(const QString &input);
+    Struct *parse(const QString &input);
 
-    class ParserException
+    class ParserException : public QException
     {
     public:
         QString message;
 
-        ParserException(QString m) { message = m; }
-
+        ParserException() : QException () {}
+        void set_message(QString m);
+        void raise() const;
+        ParserException *clone() const { return new ParserException(*this); }
     };
 
 private:
+    QRegularExpression number_re = QRegularExpression("\\d+");
+    QRegularExpression ident_re  = QRegularExpression("^[a-zA-Z_]\\w+");
+
     QChar peek();
     Symbol peek_symbol();
+    bool expect(Symbol s, QString *ret = nullptr);
+    bool accept(Symbol s, QString *ret = nullptr);
     bool at_boundary(QChar c);
-    bool expect(Symbol s);
-    bool accept(Symbol s);
     bool one_of(std::initializer_list<Symbol> s);
     void nextsym();
-    void _struct();
-    void block();
-    void statements();
-    void statement();
-    void precision();
-    void float_precision();
+    Struct *_struct();
+    void block(Struct *container);
+    void statements(QList<StructStatement *> *container);
+    StructStatement *statement();
+    void precision(NumericStatement *container = nullptr);
+    void string_length(StringStatement *container);
+    void float_precision(FloatStatement *container = nullptr);
     Symbol string_to_symbol(const QString & token);
 };
 
