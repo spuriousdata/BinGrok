@@ -13,11 +13,11 @@ public:
 
     StructStatement() {}
     StructStatement(QString n, QString t) : name(n), type(t) {}
-    virtual ~StructStatement() {}
-    virtual QString get_name();
+    virtual ~StructStatement() { if (data != nullptr) delete data;}
     unsigned int virtual record_length() { return 0; }
     void alloc();
-    void set_data(const char *d);
+    virtual void set_data(const char *d);
+    virtual QString to_string(int indent_level=0) { return ""; }
 };
 
 class NumericStatement : public StructStatement
@@ -28,7 +28,7 @@ public:
 
     NumericStatement() : StructStatement() {}
     NumericStatement(QString n, QString t) : StructStatement(n, t) { }
-    virtual QString get_name();
+    virtual QString to_string(int indent_level=0);
     unsigned int record_length() { return precision; }
 };
 
@@ -40,7 +40,7 @@ public:
 
     StringStatement() : StructStatement() {}
     StringStatement(QString n, QString t) : StructStatement(n, t) { }
-    virtual QString get_name();
+    virtual QString to_string(int indent_level=0);
     unsigned int record_length() { return (length_bytes); }
 };
 
@@ -52,7 +52,7 @@ public:
     Struct() : StructStatement() {}
     Struct(QString n, QString t) : StructStatement(n, t) { }
     virtual ~Struct() { for (auto it = statements.begin(); it != statements.end(); it++) delete *it; }
-    virtual QString get_name();
+    virtual QString to_string(int indent_level=0);
     void populate(const char *d);
     unsigned int record_length() { unsigned int s = 0; for (auto it = statements.begin(); it != statements.end(); it++) s += (*it)->record_length(); return s;}
 };

@@ -22,7 +22,7 @@
 
 HexWidget::HexWidget(QWidget *parent) :
 	QWidget(parent),file(NULL),seek_to(0),
-    columns(20),rows(20),sel(NULL),
+    columns(20),rows(20),sel(new Selection(0, 0)), grokked(new Selection(0, 0)),
     txtdisplay(NULL), mouse_down(false)
 {
 	scroll_timer = new QTimer(this);
@@ -85,7 +85,14 @@ bool HexWidget::open(const QString & filename)
 	emit file_opened(file);
 
 	trigger_resizeEvent();
+
+    sel->resize(columns, file->size());
+    grokked->resize(columns, file->size());
+    txtdisplay->set_selection(sel);
+    txtdisplay->set_grokked(grokked);
+
     update();
+
 	return true;
 }
 
@@ -241,13 +248,9 @@ void HexWidget::selection(QMouseEvent *e, bool new_selection=false)
 		return;
 
 	if (new_selection) {
-		if (sel != NULL) {
-			delete sel;
-			sel = NULL;
-            txtdisplay->set_selection(NULL);
-		}
-		sel = new Selection(columns, file->size());
-        txtdisplay->set_selection(sel);
+        if (sel->is_active())
+            sel->reset();
+
 		sel->start(xy_to_grid(e), seek_to);
 	} else {
 		sel->end(xy_to_grid(e), seek_to);
@@ -273,6 +276,18 @@ void HexWidget::drag_scroll()
 	}
 }
 
+void HexWidget::highlight(quint64 start_tell,quint64 end_tell)
+{
+    grokked->select(start_tell, end_tell);
+    update();
+}
+
+void HexWidget::reset_highlight()
+{
+    grokked->reset();
+    update();
+}
+
 /******************************************************************************
  *
  *                             Overrides
@@ -285,7 +300,6 @@ void HexWidget::paintEvent(QPaintEvent *e)
 
 	painter.setFont(font());
 	QPalette palette = QApplication::palette(this);
-	painter.setPen(palette.foreground().color());
 	painter.setBackgroundMode(Qt::OpaqueMode);
 
 	quint32 i = 0;
@@ -294,19 +308,20 @@ void HexWidget::paintEvent(QPaintEvent *e)
 			QString word = get_dataword(i);
 			i += bytes_per_column;
 
-			if (sel != NULL) {
-				if (sel->in_range(c, r, seek_to)) {
-					painter.setBackground(palette.link());
-					painter.setPen(palette.brightText().color());
-				} else {
-					painter.setBackground(palette.base());
-					painter.setPen(palette.foreground().color());
-				}
-			}
+            // put selection first so that you can "see" it over the grokked bytes
+            if (sel->is_active() && sel->in_range(c, r, seek_to)) {
+                painter.setBackground(palette.link());
+                painter.setPen(palette.brightText().color());
+            } else if (grokked->is_active() && grokked->in_range(c, r, seek_to)) {
+                painter.setBackground(palette.highlight());
+                painter.setPen(palette.brightText().color());
+            } else {
+                painter.setBackground(palette.base());
+                painter.setPen(palette.foreground().color());
+            }
 			painter.drawText(c*col_width, r*row_height,
 							 col_width, row_height, Qt::AlignLeft,
-							 word
-							 );
+							 word);
 		}
 	}
 }
@@ -328,6 +343,8 @@ void HexWidget::resizeEvent(QResizeEvent *e)
 		bytes_per_page = bytes_per_line() * rows;
 		scroll_lines = ((file->size() - bytes_per_page) / bytes_per_line()) + 1;
 		scrollbar->setRange(0, scroll_lines);
+        sel->resize(columns);
+        grokked->resize(columns);
 	}
 }
 
@@ -344,10 +361,8 @@ void HexWidget::wheelEvent(QWheelEvent *e)
 void HexWidget::mousePressEvent(QMouseEvent *e)
 {
     if (e->button() == Qt::LeftButton) {
-        if (sel != NULL) {
-            delete sel;
-            sel = NULL;
-            txtdisplay->set_selection(NULL);
+        if (sel->is_active()) {
+            sel->reset();
             update();
         }
         mouse_down = true;
@@ -359,7 +374,7 @@ void HexWidget::mouseReleaseEvent(QMouseEvent *e)
 {
 	if (e->button() == Qt::LeftButton) {
 		mouse_down = false;
-		if (sel != NULL) {
+        if (sel->is_active()) {
             selection(e, false);
 			scroll_timer->stop();
             update();
@@ -370,11 +385,10 @@ void HexWidget::mouseReleaseEvent(QMouseEvent *e)
 
 void HexWidget::mouseMoveEvent(QMouseEvent *e)
 {
-	if (sel == NULL && mouse_down) {
+    if (!sel->is_active() && mouse_down) {
 		selection(e, true);
-	} else if (sel != NULL && mouse_down) {
-		sel->end(xy_to_grid(e), seek_to);
-        update();
+    } else if (sel->is_active() && mouse_down) {
+        selection(e, false);
 		e->accept();
 
 		/* if moved below or above widget bounds

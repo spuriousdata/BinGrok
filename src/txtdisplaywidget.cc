@@ -56,6 +56,11 @@ void TxtDisplayWidget::set_selection(Selection *s)
     sel = s;
 }
 
+void TxtDisplayWidget::set_grokked(Selection *s)
+{
+    grokked = s;
+}
+
 void TxtDisplayWidget::set_seek_to(qint64 *st)
 {
     seek_to = st;
@@ -124,14 +129,15 @@ void TxtDisplayWidget::paintEvent(QPaintEvent *e)
         for (int c = 0; c < columns; c++) {
             QString word = get_dataword(i++);
 
-            if (sel != NULL) {
-                if (sel->in_range(c, r, *seek_to)) {
-                    painter.setBackground(palette.link());
-                    painter.setPen(palette.brightText().color());
-                } else {
-                    painter.setBackground(palette.base());
-                    painter.setPen(palette.foreground().color());
-                }
+            if (sel != nullptr && sel->is_active() && sel->in_range(c, r, *seek_to)) {
+                painter.setBackground(palette.link());
+                painter.setPen(palette.brightText().color());
+            } else if (grokked != nullptr && grokked->is_active() && grokked->in_range(c, r, *seek_to)) {
+                painter.setBackground(palette.highlight());
+                painter.setPen(palette.brightText().color());
+            } else {
+                painter.setBackground(palette.base());
+                painter.setPen(palette.foreground().color());
             }
 
             painter.drawText(c*col_width, r*row_height, col_width, row_height, Qt::AlignLeft, word);

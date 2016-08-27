@@ -5,7 +5,7 @@
 #include <QStringList>
 #include <QString>
 
-#define RE_B(s) ("\\b" s "\\b")
+#define BOUNDARY(s) ("\\b" s "\\b")
 
 SyntaxHighlighter::SyntaxHighlighter(QTextDocument *parent) :
     QSyntaxHighlighter (parent)
@@ -16,8 +16,7 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument *parent) :
     keyword_format.setFontWeight(QFont::Bold);
 
     QStringList keyword_patterns;
-    keyword_patterns << RE_B("int") << RE_B("uint") << RE_B("struct")
-                     << RE_B("array") << RE_B("string") << RE_B("float");
+    keyword_patterns << BOUNDARY("int") << BOUNDARY("uint") << BOUNDARY("struct") << BOUNDARY("array") << BOUNDARY("string");
 
     foreach (const QString &pattern, keyword_patterns) {
         rule.pattern = QRegExp(pattern);
@@ -25,12 +24,13 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument *parent) :
         highlighting_rules.append(rule);
     }
 
-    integer_format.setForeground(Qt::cyan);
+    integer_format.setForeground(Qt::black);
+    integer_format.setFontWeight(QFont::Bold);
     rule.pattern = QRegExp("[0-9]+");
     rule.format = integer_format;
     highlighting_rules.append(rule);
 
-    single_line_comment_format.setForeground(Qt::red);
+    single_line_comment_format.setForeground(Qt::gray);
     rule.pattern = QRegExp("//[^\n]*");
     rule.format = single_line_comment_format;
     highlighting_rules.append(rule);

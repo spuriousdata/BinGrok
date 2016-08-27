@@ -4,7 +4,9 @@
 #include <QDialog>
 #include <QList>
 #include <QMessageBox>
+#include "hexwidget.h"
 #include "syntaxhighlighter.h"
+#include "datavisualizer.h"
 #include "structtypes.h"
 
 namespace Ui {
@@ -22,13 +24,20 @@ public:
 private:
     Ui::StructEditor *ui;
     SyntaxHighlighter *highlighter;
+    DataVisualizer *dv = nullptr;
     QList<StructStatement*> structs;
     QMessageBox *error_window;
+    HexWidget *hex_display;
+
+    void show_datavisualizer(Struct *s);
 
 public slots:
     void apply_struct();
     void close_and_apply();
     //void close();
+
+signals:
+    void struct_applied(quint64 start, quint64 end);
 };
 
 #endif // STRUCTEDITOR_H

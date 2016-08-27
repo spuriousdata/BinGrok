@@ -55,6 +55,7 @@ private:
 	QByteArray  viewport_data;
 	TrTable     trtable;
 	Selection  *sel;
+    Selection  *grokked;
 	QPoint      mouse_position;
 	QTimer     *scroll_timer;
 	QScrollBar *scrollbar;
@@ -86,7 +87,8 @@ public slots:
 	void scroll_changed(int i);
 	void drag_scroll();
     void update();
-
+    void highlight(quint64 start_tell, quint64 end_tell);
+    void reset_highlight();
 };
 
 #endif // BGHEXWIDGET_H

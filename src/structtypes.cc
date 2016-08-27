@@ -1,10 +1,11 @@
+#include <QTextStream>
+#include <QByteArray>
 #include "structtypes.h"
 
-QString StructStatement::get_name()
-{
-    return name;
-}
 
+/*******************************************
+ *           StructStatement
+ * *****************************************/
 void StructStatement::alloc()
 {
     data = new char[record_length()]();
@@ -15,6 +16,24 @@ void StructStatement::set_data(const char *d)
     if (data == nullptr)
         alloc();
     std::memcpy(data, d, record_length());
+}
+
+/*******************************************
+ *                 Struct
+ * *****************************************/
+QString Struct::to_string(int indent_level)
+{
+    QString out;
+    QString indent(indent_level, ' ');
+    QTextStream writer(&out);
+
+    writer  << indent << name << " {" << endl;
+
+    for (auto it = statements.begin(); it != statements.end(); it++) {
+        writer << indent << (*it)->to_string(indent_level+1);
+    }
+    writer << indent << "};" << endl;
+    return out;
 }
 
 void Struct::populate(const char * const d)
@@ -32,19 +51,31 @@ void Struct::populate(const char * const d)
     }
 }
 
-
-QString NumericStatement::get_name()
+/*******************************************
+ *            NumericStatement
+ * *****************************************/
+QString NumericStatement::to_string(int indent_level)
 {
-    return name;
+    QString out;
+    QString indent(indent_level, ' ');
+    QTextStream writer(&out);
+    QString formatted_data(QByteArray(data, record_length()));
+
+    writer << indent << name << ": " << formatted_data << ";" << endl;
+    return out;
 }
 
-QString StringStatement::get_name()
+/*******************************************
+ *           StringStatement
+ * *****************************************/
+QString StringStatement::to_string(int indent_level)
 {
-    return name;
-}
+    QString out;
+    QString indent(indent_level, ' ');
+    QTextStream writer(&out);
+    QString formatted_data(QByteArray(data, record_length()));
 
-QString Struct::get_name()
-{
-    return name;
+    writer << indent << name << ": \"" << formatted_data << "\";" << endl;
+    return out;
 }
 

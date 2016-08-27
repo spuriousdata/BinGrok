@@ -19,8 +19,10 @@ SOURCES += \
     txtdisplaywidget.cc \
     structeditor.cc \
     syntaxhighlighter.cc \
+    datahighlighter.cc \
     structtypes.cc \
-    rd_parser.cc
+    rd_parser.cc \
+    datavisualizer.cc
 
 HEADERS  += \
     bingrokwindow.h \
@@ -31,10 +33,13 @@ HEADERS  += \
     txtdisplaywidget.h \
     structeditor.h \
     syntaxhighlighter.h \
+    datahighlighter.h \
     structtypes.h \
-    rd_parser.h
+    rd_parser.h \
+    datavisualizer.h
 
 FORMS    += \
     bingrokwindow.ui \
     preferences.ui \
-    structeditor.ui
+    structeditor.ui \
+    datavisualizer.ui

@@ -78,7 +78,7 @@ void BinGrokWindow::read_settings()
 	s.beginGroup("window");
 	resize(s.value("size", QSize(400,400)).toSize());
 	move(s.value("position", QPoint(200,200)).toPoint());
-	max_recently_open = s.value("max_recently_open", 8).toInt();
+    max_recently_open = static_cast<quint8>(s.value("max_recently_open", 8).toUInt());
 
 	recently_open = s.value("recently_open").toStringList();
 
@@ -88,19 +88,20 @@ void BinGrokWindow::read_settings()
 void BinGrokWindow::open()
 {
 	QString filename = QFileDialog::getOpenFileName(this);
-	if (!filename.isEmpty())
-		hexwidget->open(filename);
+    if (!filename.isEmpty())
+        open_file(filename);
 }
 
 void BinGrokWindow::open_file(const QString &f)
 {
+    has_open_file = true;
 	hexwidget->open(f);
 }
 
 void BinGrokWindow::open_recent()
 {
 	QAction *a = qobject_cast<QAction *>(sender());
-	if (a) hexwidget->open(a->data().toString());
+    if (a) open_file(a->data().toString());
 }
 
 void BinGrokWindow::new_file()
@@ -115,7 +116,7 @@ void BinGrokWindow::save()
 	qDebug("save() called");
 #endif
 	/*
-	  if bghexwidget contents is empty:
+      if bghexwidget contents is empty:test
 		return saveAs();
 	  else
 		return save_file(current file);
@@ -167,10 +168,18 @@ void BinGrokWindow::show_preferences()
 
 void BinGrokWindow::show_struct_editor()
 {
-    if (structeditor_ui == NULL) {
-        structeditor_ui = new StructEditor(this);
+    if (!has_open_file) {
+        if (error_window == nullptr)
+            error_window = new QMessageBox();
+        error_window->setWindowTitle("Error");
+        error_window->setText("Can't edit datastructure when there is no file open!");
+        error_window->show();
+    } else {
+        if (structeditor_ui == NULL) {
+            structeditor_ui = new StructEditor(this);
+        }
+        structeditor_ui->show();
     }
-    structeditor_ui->show();
 }
 
 void BinGrokWindow::save_preferences()

@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QStringList>
+#include <QMessageBox>
 #include "hexwidget.h"
 
 class QString;
@@ -39,6 +40,8 @@ private:
 	QHBoxLayout *layout;
 	quint8 max_recently_open;
 	QStringList recently_open;
+    bool has_open_file = false;
+    QMessageBox *error_window = nullptr;
 
 	void read_settings();
 	bool save_file(const QString & filename);
