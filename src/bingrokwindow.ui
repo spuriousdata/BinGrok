@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>400</width>
-     <height>27</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -32,7 +32,7 @@
       <bool>true</bool>
      </property>
      <property name="title">
-      <string>Open Recent</string>
+      <string>Open &amp;Recent</string>
      </property>
     </widget>
     <addaction name="action_New"/>

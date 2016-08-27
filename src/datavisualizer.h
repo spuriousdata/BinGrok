@@ -2,8 +2,10 @@
 #define DATAVISUALIZER_H
 
 #include <QDialog>
+#include <QLayoutItem>
 #include "structtypes.h"
 #include "datahighlighter.h"
+#include "dataviswidget.h"
 
 namespace Ui {
 class DataVisualizer;
@@ -18,10 +20,16 @@ public:
     ~DataVisualizer();
     void visualize(Struct *s);
 
+protected:
+    void mouseReleaseEvent(QMouseEvent *);
+
 private:
     Ui::DataVisualizer *ui;
+
     Struct *current_data = nullptr;
     DataHighlighter *highlighter;
+    DataVisWidget *text_display;
+    QLayoutItem *text_display_li;
 };
 
 #endif // DATAVISUALIZER_H

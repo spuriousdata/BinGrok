@@ -67,7 +67,7 @@ void StructEditor::apply_struct()
         d = hex_display->read_bytes(start_offset, s->record_length());
         s->populate(d);
         show_datavisualizer(s);
-        emit struct_applied(start_offset, s->record_length());
+        emit struct_applied(start_offset, s->record_length()-1);
     } catch (RDParser::ParserException &e) {
         error_window->setWindowTitle("Parse Error");
         error_window->setWindowFlags(Qt::WindowStaysOnTopHint);

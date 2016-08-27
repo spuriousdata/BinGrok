@@ -278,7 +278,7 @@ void HexWidget::drag_scroll()
 
 void HexWidget::highlight(quint64 start_tell, quint64 end_tell)
 {
-    grokked->select(start_tell, end_tell-1);
+    grokked->select(start_tell, end_tell);
     update();
 }
 

@@ -1,5 +1,5 @@
-#ifndef STRUCTTYPES_H_
-#define STRUCTTYPES_H_
+#ifndef STRUCTTYPES_H
+#define STRUCTTYPES_H
 
 #include <QString>
 #include <QList>
@@ -65,4 +65,4 @@ public:
     unsigned int record_length() { unsigned int s = 0; for (auto it = statements.begin(); it != statements.end(); it++) s += (*it)->record_length(); return s;}
 };
 
-#endif /* STRUCTTYPES_H_ */
+#endif /* STRUCTTYPES_H */
