@@ -49,7 +49,7 @@ void StructEditor::apply_struct()
     try {
         s = r.parse(data);
 
-        const char *d = static_cast<BinGrokWindow*>(parent())->get_hexwidget()->read_bytes(0, s->record_length());
+        const char *d = static_cast<BinGrokWindow*>(parent())->get_hexwidget()->read_bytes(ui->start_at->text().toLong(), s->record_length());
         s->populate(d);
     } catch (RDParser::ParserException &e) {
         error_window->setWindowTitle("Parse Error");
