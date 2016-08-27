@@ -1,6 +1,7 @@
 #include "structeditor.h"
 #include "ui_structeditor.h"
 #include "syntaxhighlighter.h"
+#include "bingrokwindow.h"
 #include "rd_parser.h"
 #include "structtypes.h"
 
@@ -47,6 +48,9 @@ void StructEditor::apply_struct()
     Struct *s;
     try {
         s = r.parse(data);
+
+        const char *d = static_cast<BinGrokWindow*>(parent())->get_hexwidget()->read_bytes(0, s->record_length());
+        s->populate(d);
     } catch (RDParser::ParserException &e) {
         error_window->setWindowTitle("Parse Error");
         error_window->setWindowFlags(Qt::WindowStaysOnTopHint);

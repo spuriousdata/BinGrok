@@ -25,7 +25,7 @@ private:
     int         row_height;
     TrTable     *trtable;
     Selection   *sel;
-    quint64     *seek_to;
+    qint64     *seek_to;
 
     void    trigger_resizeEvent();
     void    update_grid_sizes();
@@ -34,7 +34,7 @@ private:
     void set_viewport_data(QByteArray *v);
     void set_trtable(TrTable *t);
     void set_selection(Selection *s);
-    void set_seek_to(quint64 *st);
+    void set_seek_to(qint64 *st);
     void read_settings();
 
 signals:

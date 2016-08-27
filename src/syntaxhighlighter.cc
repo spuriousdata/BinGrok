@@ -25,7 +25,7 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument *parent) :
         highlighting_rules.append(rule);
     }
 
-    integer_format.setForeground(Qt::green);
+    integer_format.setForeground(Qt::cyan);
     rule.pattern = QRegExp("[0-9]+");
     rule.format = integer_format;
     highlighting_rules.append(rule);

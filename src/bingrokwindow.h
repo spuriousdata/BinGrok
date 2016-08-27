@@ -3,9 +3,9 @@
 
 #include <QMainWindow>
 #include <QStringList>
+#include "hexwidget.h"
 
 class QString;
-class HexWidget;
 class TxtDisplayWidget;
 class QScrollBar;
 class QFile;
@@ -26,6 +26,7 @@ class BinGrokWindow : public QMainWindow
 public:
 	explicit BinGrokWindow(QWidget *parent = 0);
 	~BinGrokWindow();
+    HexWidget *get_hexwidget() { return hexwidget; }
 
 private:
 	Ui::BinGrokWindow *ui;

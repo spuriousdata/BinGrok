@@ -56,7 +56,7 @@ void TxtDisplayWidget::set_selection(Selection *s)
     sel = s;
 }
 
-void TxtDisplayWidget::set_seek_to(quint64 *st)
+void TxtDisplayWidget::set_seek_to(qint64 *st)
 {
     seek_to = st;
 }

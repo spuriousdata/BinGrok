@@ -186,6 +186,19 @@ void HexWidget::update_viewport_data()
 	viewport_data = file->read(rows*columns*bytes_per_column);
 }
 
+const char *HexWidget::read_bytes(qint64 from, qint64 length) const
+{
+    qint64 tell = file->pos();
+    char *data = new char[length];
+    file->seek(from);
+    file->read(data, length);
+
+    // restore state
+    file->seek(tell);
+
+    return data;
+}
+
 
 QString HexWidget::get_dataword(quint32 offset)
 {
@@ -194,8 +207,8 @@ QString HexWidget::get_dataword(quint32 offset)
 	for (int i = 0; i < bytes_per_column; i++) {
 		if (file == NULL) data.append(" ");
 		else {
-			int x = offset+i;
-			if (viewport_data.size() <= x) data.append(" ");
+            uint x = offset+i;
+            if (static_cast<uint>(viewport_data.size()) <= x) data.append(" ");
 			else data.append(trtable.get_hex(viewport_data[x]));
 		}
 	}

@@ -5,10 +5,42 @@ QString StructStatement::get_name()
     return name;
 }
 
+void StructStatement::alloc()
+{
+    data = new char[record_length()]();
+}
+
+void StructStatement::set_data(const char *d)
+{
+    if (data == nullptr)
+        alloc();
+    std::memcpy(data, d, record_length());
+}
+
+void Struct::populate(const char * const d)
+{
+    char *ptr = (char*)d;
+    /*
+    set_data(ptr);
+    ptr += record_length();
+    */
+    for (auto it = statements.begin(); it != statements.end(); it++) {
+        Struct *strct;
+        if ((strct = dynamic_cast<Struct*>(*it)) != NULL) {
+            strct->populate(ptr);
+        } else {
+            (*it)->set_data(ptr);
+            ptr += (*it)->record_length();
+        }
+    }
+}
+
+/*
 QString FloatStatement::get_name()
 {
     return name;
 }
+*/
 
 QString NumericStatement::get_name()
 {

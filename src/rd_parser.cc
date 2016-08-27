@@ -45,7 +45,7 @@ void RDParser::precision(NumericStatement *container)
 
     expect(lparen);
     accept(number, &val);
-    container->precision_bits = val.toUInt();
+    container->precision = val.toUInt();
     expect(rparen);
 }
 
@@ -62,6 +62,7 @@ void RDParser::string_length(StringStatement *container)
     expect(rbracket);
 }
 
+/*
 void RDParser::float_precision(FloatStatement *container)
 {
     QString val;
@@ -77,6 +78,7 @@ void RDParser::float_precision(FloatStatement *container)
     container->mantissa_bits = val.toUInt();
     expect(rparen);
 }
+*/
 
 bool RDParser::one_of(std::initializer_list<Symbol> s)
 {
@@ -108,12 +110,12 @@ StructStatement *RDParser::statement()
         string_length(static_cast<StringStatement*>(ss));
         expect(identifier, &name);
         expect(semicolon);
-    } else if (accept(floatsym)) {
+    } /*else if (accept(floatsym)) {
         ss = new FloatStatement();
         float_precision(static_cast<FloatStatement*>(ss));
         expect(identifier, &name);
         expect(semicolon);
-    } else {
+    } */ else {
        try_struct = true;
     }
 
@@ -216,8 +218,10 @@ Symbol RDParser::string_to_symbol(const QString & token)
         return intsym;
     if (token == "uint")
         return uintsym;
+    /*
     if (token == "float")
         return floatsym;
+    */
     if (token == "string")
         return stringsym;
     if (token == "array")

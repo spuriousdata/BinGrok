@@ -31,6 +31,7 @@ public:
 	void set_scrollbar(QScrollBar *s);
     void set_txtdisplay(TxtDisplayWidget *t);
     bool get_display_textview() { return display_textview; }
+    const char *read_bytes(qint64 from, qint64 length) const;
 
 protected:
 	void paintEvent(QPaintEvent *e);
@@ -41,13 +42,13 @@ protected:
 	void mouseMoveEvent(QMouseEvent *);
 
 private:
-	quint16     columns;
-	quint16     rows;
+    QFile      *file;
+    qint64      seek_to;
+    int         columns;
+    int         rows;
 	quint8      bytes_per_column;
-	quint64     seek_to;
 	quint32     bytes_per_page;
 	quint32     scroll_lines;
-	QFile      *file;
 	off_t       cur_offset;
 	int         col_width;
 	int         row_height;
@@ -55,13 +56,13 @@ private:
 	TrTable     trtable;
 	Selection  *sel;
 	QPoint      mouse_position;
-	bool        mouse_down;
 	QTimer     *scroll_timer;
 	QScrollBar *scrollbar;
 	enum SCROLL_DIRECTION { UP=0, DOWN=2 } scroll_direction;
 	quint8      scroll_speed;
     TxtDisplayWidget *txtdisplay;
     bool display_textview;
+    bool        mouse_down;
 
 	off_t   bytes_per_line();
 	void    read_settings();
