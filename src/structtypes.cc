@@ -19,11 +19,8 @@ void StructStatement::set_data(const char *d)
 
 void Struct::populate(const char * const d)
 {
-    char *ptr = (char*)d;
-    /*
-    set_data(ptr);
-    ptr += record_length();
-    */
+    char *ptr = const_cast<char* const>(d);
+
     for (auto it = statements.begin(); it != statements.end(); it++) {
         Struct *strct;
         if ((strct = dynamic_cast<Struct*>(*it)) != NULL) {
@@ -35,12 +32,6 @@ void Struct::populate(const char * const d)
     }
 }
 
-/*
-QString FloatStatement::get_name()
-{
-    return name;
-}
-*/
 
 QString NumericStatement::get_name()
 {

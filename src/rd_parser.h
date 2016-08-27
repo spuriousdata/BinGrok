@@ -25,7 +25,6 @@ typedef enum {
     structsym,
     intsym,
     uintsym,
-    floatsym,
     semicolon,
     comma,
     colon,
@@ -76,7 +75,6 @@ private:
         { structsym, "struct" },
         { intsym, "int" },
         { uintsym, "uint" },
-        { floatsym, "float" },
         { semicolon, ";" },
         { comma, "," },
         { colon, ":" },
@@ -99,7 +97,6 @@ private:
     StructStatement *statement();
     void precision(NumericStatement *container = nullptr);
     void string_length(StringStatement *container);
-    //void float_precision(FloatStatement *container = nullptr);
     Symbol string_to_symbol(const QString & token);
 };
 

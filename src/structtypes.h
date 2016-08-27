@@ -20,21 +20,6 @@ public:
     void set_data(const char *d);
 };
 
-/*
-class FloatStatement : public StructStatement
-{
-public:
-    unsigned int sign_bits = 0;
-    unsigned int exponent_bits = 0;
-    unsigned int mantissa_bits = 0;
-
-    FloatStatement() : StructStatement() {}
-    FloatStatement(QString n, QString t) : StructStatement(n, t) { }
-    virtual QString get_name();
-    unsigned int record_length() { return (sign_bits + exponent_bits + mantissa_bits); }
-};
-*/
-
 class NumericStatement : public StructStatement
 {
 public:

@@ -70,24 +70,6 @@ void RDParser::string_length(StringStatement *container)
     expect(rbracket);
 }
 
-/*
-void RDParser::float_precision(FloatStatement *container)
-{
-    QString val;
-
-    expect(lparen);
-    expect(number, &val);
-    container->sign_bits = val.toUInt();
-    expect(comma);
-    expect(number, &val);
-    container->exponent_bits = val.toUInt();
-    expect(comma);
-    expect(number, &val);
-    container->mantissa_bits = val.toUInt();
-    expect(rparen);
-}
-*/
-
 bool RDParser::one_of(std::initializer_list<Symbol> s)
 {
     for (auto it = s.begin(); it != s.end(); it++)
@@ -118,12 +100,7 @@ StructStatement *RDParser::statement()
         string_length(static_cast<StringStatement*>(ss));
         expect(identifier, &name);
         expect(semicolon);
-    } /*else if (accept(floatsym)) {
-        ss = new FloatStatement();
-        float_precision(static_cast<FloatStatement*>(ss));
-        expect(identifier, &name);
-        expect(semicolon);
-    } */ else {
+    } else {
        try_struct = true;
     }
 
