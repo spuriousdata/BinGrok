@@ -4,6 +4,14 @@
 #include <QtDebug>
 #endif
 
+RDParser::RDParser()
+{
+    line = 1;
+    for (auto it = sym_to_tok.begin(); it != sym_to_tok.end(); it++) {
+        tok_to_sym.insert(it.value(), it.key());
+    }
+}
+
 Struct *RDParser::parse(const QString &input)
 {
     data = QString(input);
@@ -143,7 +151,7 @@ bool RDParser::expect(Symbol s, QString *ret)
     if (accept(s, ret))
         return true;
     QString message;
-    QTextStream(&message) << "Got '" << next.token << "' expected '" << s << "'";
+    QTextStream(&message) << "Got '" << next.token << "' at line:" << line << " offset: " << chr << " expected '" << sym_to_tok[s] << "'" << endl;
     auto ex = RDParser::ParserException();
     ex.set_message(message);
     throw ex;
@@ -196,47 +204,22 @@ bool is_word_char(QChar c)
 
 Symbol RDParser::string_to_symbol(const QString & token)
 {
+    Symbol s = tok_to_sym.value(token, unknown);
 
+    if (s == unknown && number_re.match(token).hasMatch())
+        s = number;
+    if (s == unknown && ident_re.match(token).hasMatch())
+        s = identifier;
 
-    if (token == "")
-        return theend;
-    if (token == "struct")
-        return structsym;
-    if (token == "{")
-        return lcurly;
-    if (token == "}")
-        return rcurly;
-    if (token == "(")
-        return lparen;
-    if (token == ")")
-        return rparen;
-    if (token == "[")
-        return lbracket;
-    if (token == "]")
-        return rbracket;
-    if (token == "int")
-        return intsym;
-    if (token == "uint")
-        return uintsym;
-    /*
-    if (token == "float")
-        return floatsym;
-    */
-    if (token == "string")
-        return stringsym;
-    if (token == "array")
-        return arraysym;
-    if (token == ";")
-        return semicolon;
-    if (token == ",")
-        return comma;
-    if (token == ":")
-        return colon;
-    if (number_re.match(token).hasMatch())
-        return number;
-    if (ident_re.match(token).hasMatch())
-        return identifier;
-    return unknown;
+    return s;
+}
+
+QChar RDParser::read_char()
+{
+    QChar c;
+    *datastream >> c;
+    chr++;
+    return c;
 }
 
 void RDParser::nextsym()
@@ -244,18 +227,23 @@ void RDParser::nextsym()
     QChar c;
     QString token;
 
-    *datastream >> c;
+    c = read_char();
     if (!datastream->atEnd()) {
         // eat whitespace
-        while (c.isSpace())
-            *datastream >> c;
+        while (c.isSpace()) {
+            if (c == '\n') {
+                line++;
+                chr = 0;
+            }
+            c = read_char();
+        }
     }
 
     while (!datastream->atEnd()) {
         token.append(c);
         if (at_boundary(c))
             break;
-        *datastream >> c;
+        c = read_char();
     }
 
     if (!c.isNull() && token.isEmpty())

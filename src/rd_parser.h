@@ -6,6 +6,7 @@
 #include <QRegularExpression>
 #include <QList>
 #include <QException>
+#include <QMap>
 #include <initializer_list>
 #include "structtypes.h"
 
@@ -42,7 +43,7 @@ public:
     QString data;
     QTextStream *datastream;
 
-
+    RDParser();
     Struct *parse(const QString &input);
 
     class ParserException : public QException
@@ -59,9 +60,34 @@ public:
 private:
     QRegularExpression number_re = QRegularExpression("\\d+");
     QRegularExpression ident_re  = QRegularExpression("^[a-zA-Z_]\\w+");
+    uint line;
+    uint chr;
+    QMap<Symbol,QString> sym_to_tok =  {
+        { identifier, "<identifier>" },
+        { lcurly, "{" },
+        { rcurly, "}" },
+        { lparen, "(" },
+        { rparen, ")" },
+        { lbracket, "[" },
+        { rbracket, "]" },
+        { number, "<number>" },
+        { stringsym, "string" },
+        { arraysym, "array" },
+        { structsym, "struct" },
+        { intsym, "int" },
+        { uintsym, "uint" },
+        { floatsym, "float" },
+        { semicolon, ";" },
+        { comma, "," },
+        { colon, ":" },
+        { theend, "" }, // this value needs to be blank
+        { unknown, "<unknown>" }
+    };
+    QMap<QString,Symbol> tok_to_sym;
 
     QChar peek();
     Symbol peek_symbol();
+    QChar read_char();
     bool expect(Symbol s, QString *ret = nullptr);
     bool accept(Symbol s, QString *ret = nullptr);
     bool at_boundary(QChar c);
