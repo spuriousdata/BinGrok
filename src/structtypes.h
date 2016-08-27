@@ -44,6 +44,14 @@ public:
     unsigned int record_length() { return (length_bytes); }
 };
 
+class ArrayStatement : public StringStatement
+{
+public:
+    ArrayStatement() : StringStatement() {}
+    ArrayStatement(QString n, QString t) : StringStatement(n, t) {}
+    virtual QString to_string(int indent_level=0);
+};
+
 class Struct : public StructStatement
 {
 public:

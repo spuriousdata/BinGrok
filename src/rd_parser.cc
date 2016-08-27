@@ -95,9 +95,14 @@ StructStatement *RDParser::statement()
         static_cast<NumericStatement*>(ss)->is_unsigned = true;
         expect(identifier, &name);
         expect(semicolon);
-    } else if (one_of({stringsym, arraysym})) {
+    } else if (accept(stringsym)) {
         ss = new StringStatement();
         string_length(static_cast<StringStatement*>(ss));
+        expect(identifier, &name);
+        expect(semicolon);
+    } else if (accept(arraysym)) {
+        ss = new ArrayStatement();
+        string_length(static_cast<ArrayStatement*>(ss));
         expect(identifier, &name);
         expect(semicolon);
     } else {
@@ -171,7 +176,12 @@ bool RDParser::at_boundary(QChar c)
 {
     QChar n = peek();
     /* each punct symbol should be treated separately, so we treat them as word boundaries */
-    return (!((is_word_char(c) == is_word_char(n)) && (c.isSpace() == n.isSpace())) || c.isPunct() || n.isPunct());
+    return (!((is_word_char(c) == is_word_char(n)) && (c.isSpace() == n.isSpace())) || is_punct(c) || is_punct(n));
+}
+
+bool is_punct(QChar c)
+{
+    return (c != '_' && c.isPunct());
 }
 
 bool is_word_char(QChar c)

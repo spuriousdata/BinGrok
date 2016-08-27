@@ -13,20 +13,20 @@ DataHighlighter::DataHighlighter(QTextDocument *parent) :
 
     QTextCharFormat string_format, ident_format, integer_format;
 
-    string_format.setForeground(Qt::darkBlue);
-
+    ident_format.setForeground(Qt::blue);
+    ident_format.setFontItalic(true);
     highlighting_rules.append({
-                                  QRegExp("\".*\";"),
+                                  QRegExp("^.+(?=:)"),
+                                  ident_format
+                              });
+
+    string_format.setForeground(Qt::darkBlue);
+    highlighting_rules.append({
+                                  QRegExp("[\"\\[].*[\"\\]];$"),
                                   string_format
                               });
 
-    ident_format.setForeground(Qt::blue);
-    ident_format.setFontItalic(true);
 
-    highlighting_rules.append({
-                                  QRegExp(".+(?=:)"),
-                                  ident_format
-                              });
 
     integer_format.setForeground(Qt::black);
     integer_format.setFontWeight(QFont::Bold);

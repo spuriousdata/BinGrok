@@ -42,12 +42,11 @@ void Struct::populate(const char * const d)
 
     for (auto it = statements.begin(); it != statements.end(); it++) {
         Struct *strct;
-        if ((strct = dynamic_cast<Struct*>(*it)) != NULL) {
+        if ((strct = dynamic_cast<Struct*>(*it)) != NULL)
             strct->populate(ptr);
-        } else {
+        else
             (*it)->set_data(ptr);
-            ptr += (*it)->record_length();
-        }
+        ptr += (*it)->record_length();
     }
 }
 
@@ -60,6 +59,8 @@ QString NumericStatement::to_string(int indent_level)
     QString indent(indent_level, ' ');
     QTextStream writer(&out);
     QString formatted_data(QByteArray(data, record_length()));
+    while(formatted_data.startsWith('0'))
+        formatted_data.remove(0, 1);
 
     writer << indent << name << ": " << formatted_data << ";" << endl;
     return out;
@@ -74,8 +75,23 @@ QString StringStatement::to_string(int indent_level)
     QString indent(indent_level, ' ');
     QTextStream writer(&out);
     QString formatted_data(QByteArray(data, record_length()));
+    formatted_data.replace("\n", "\\n").replace("\t", "\\t");
 
     writer << indent << name << ": \"" << formatted_data << "\";" << endl;
+    return out;
+}
+
+/*******************************************
+ *            ArrayStatement
+ * *****************************************/
+QString ArrayStatement::to_string(int indent_level)
+{
+    QString out;
+    QString indent(indent_level, ' ');
+    QTextStream writer(&out);
+    QByteArray formatted_data(data, record_length());
+
+    writer << indent << name << ": [" << formatted_data << "];" << endl;
     return out;
 }
 

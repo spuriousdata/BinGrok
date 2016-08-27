@@ -101,5 +101,6 @@ private:
 };
 
 bool is_word_char(QChar c);
+bool is_punct(QChar c);
 
 #endif
