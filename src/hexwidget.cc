@@ -66,7 +66,7 @@ void HexWidget::write_settings()
 	s.endGroup();
 }
 
-bool HexWidget::open(const QString & filename)
+bool HexWidget::open(const QString & filename, bool _emit)
 {
 	if (!maybe_save())
 		return false;
@@ -82,7 +82,8 @@ bool HexWidget::open(const QString & filename)
 		return false;
 	} /* else success */
 
-	emit file_opened(file);
+    if (_emit)
+        emit file_opened(file);
 
 	trigger_resizeEvent();
 

@@ -41,7 +41,9 @@ private:
 	quint8 max_recently_open;
 	QStringList recently_open;
     bool has_open_file = false;
-    QMessageBox *error_window = nullptr;
+    QString hex_file;
+    QString projectfile;
+    QString last_save_dir;
 
 	void read_settings();
 	bool save_file(const QString & filename);
@@ -59,6 +61,7 @@ public slots:
     void show_struct_editor();
 	void save_preferences();
 	void add_recently_open(QFile *);
+    void add_recently_open(QString f);
 };
 
 #endif // MAINWINDOW_H

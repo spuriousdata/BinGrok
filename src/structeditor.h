@@ -3,7 +3,6 @@
 
 #include <QDialog>
 #include <QList>
-#include <QMessageBox>
 #include "hexwidget.h"
 #include "syntaxhighlighter.h"
 #include "datavisualizer.h"
@@ -20,13 +19,13 @@ class StructEditor : public QDialog
 public:
     explicit StructEditor(QWidget *parent = 0);
     ~StructEditor();
+    QString get_document();
+    void set_struct_string(QString &s);
 
 private:
-    Ui::StructEditor *ui;
+    Ui::StructEditor *ui = nullptr;
     SyntaxHighlighter *highlighter;
     DataVisualizer *dv = nullptr;
-    QList<StructStatement*> structs;
-    QMessageBox *error_window;
     HexWidget *hex_display;
 
     void show_datavisualizer(Struct *s);

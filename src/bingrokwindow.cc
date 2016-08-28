@@ -5,6 +5,7 @@
 #include "preferences.h"
 #include "structeditor.h"
 #include "unistd.h"
+#include "project.h"
 
 #include <QSettings>
 #include <QCloseEvent>
@@ -18,6 +19,7 @@
 #include <QDialogButtonBox>
 #include <QAction>
 #include <QAbstractSlider>
+#include <QKeySequence>
 
 #ifndef QT_NO_DEBUG
 #include <QDebug>
@@ -26,8 +28,7 @@
 BinGrokWindow::BinGrokWindow(QWidget *parent) :
     QMainWindow(parent),
 	ui(new Ui::BinGrokWindow),
-    preferences_ui(NULL),
-    structeditor_ui(NULL)
+    preferences_ui(NULL)
 {
 	container = new QWidget(this);
 	layout = new QHBoxLayout(container);
@@ -57,7 +58,8 @@ BinGrokWindow::BinGrokWindow(QWidget *parent) :
 
 	setCentralWidget(container);
 
-	connect(ui->action_New, SIGNAL(triggered()), this, SLOT(new_file()));
+    /* This isn't really a hex "editior" you can't create or edit files, so "New" is a pointless function */
+    //connect(ui->action_New, SIGNAL(triggered()), this, SLOT(new_file()));
 	connect(ui->action_Open, SIGNAL(triggered()), this, SLOT(open()));
 	connect(ui->action_Save, SIGNAL(triggered()), this, SLOT(save()));
 	connect(ui->action_SaveAs, SIGNAL(triggered()), this, SLOT(save_as()));
@@ -69,6 +71,8 @@ BinGrokWindow::BinGrokWindow(QWidget *parent) :
 
 	read_settings();
 	redraw_recently_open();
+
+    structeditor_ui = new StructEditor(this);
 }
 
 void BinGrokWindow::read_settings()
@@ -87,15 +91,33 @@ void BinGrokWindow::read_settings()
 
 void BinGrokWindow::open()
 {
-	QString filename = QFileDialog::getOpenFileName(this);
-    if (!filename.isEmpty())
-        open_file(filename);
+    QString f = QFileDialog::getOpenFileName(this);
+    if (!f.isEmpty())
+        open_file(f);
+    else
+        QMessageBox::warning(this, "Error", "Filename cannot be empty!");
 }
 
 void BinGrokWindow::open_file(const QString &f)
 {
+    QString structdata;
+    bool _emit = true;
+
+    if (f.endsWith(".bgk")) {
+        try {
+            Project::open_project(f, &hex_file, &structdata);
+            _emit = false;
+        } catch(Project::ProjectFileException &e) {
+            QMessageBox::warning(this, "Error", e.message);
+        }
+    } else {
+        hex_file = f;
+    }
     has_open_file = true;
-	hexwidget->open(f);
+    hexwidget->open(hex_file, _emit);
+    structeditor_ui->set_struct_string(structdata);
+    if (!_emit)
+        add_recently_open(f);
 }
 
 void BinGrokWindow::open_recent()
@@ -115,42 +137,39 @@ void BinGrokWindow::save()
 #ifndef QT_NO_DEBUG
 	qDebug("save() called");
 #endif
-	/*
-      if bghexwidget contents is empty:test
-		return saveAs();
-	  else
-		return save_file(current file);
-	*/
+    if (!projectfile.isEmpty())
+        save_file(projectfile);
+    else
+        save_as();
 }
 
 void BinGrokWindow::save_as()
 {
-	QString filename = QFileDialog::getSaveFileName(this);
-	if (filename.isEmpty())
+    projectfile = QFileDialog::getSaveFileName(this, "Save As", last_save_dir, "BinGrok Saves (*.bgk)");
+    last_save_dir = projectfile.left(projectfile.lastIndexOf("/"));
+    if (projectfile.isEmpty()) {
+        QMessageBox::warning(this, "Error", "No file specified");
 		return;
-	save_file(filename);
+    }
+#ifndef QT_NO_DEBUG
+    qDebug() << "save_as()" << projectfile;
+#endif
+    save_file(projectfile);
 }
 
 bool BinGrokWindow::save_file(const QString &filename)
 {
-	QFile file(filename);
-	if (!file.open(QFile::WriteOnly)) {
-		QMessageBox::warning(this, tr("BinGrok"),
-							 tr("Cannot write file %1:\n%2.")
-							 .arg(filename).arg(file.errorString())
-							 );
-		return false;
-	}
-	QDataStream out(&file);
 #ifndef QT_NO_CURSOR
 	QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
-	//out << bghexwidget content
+
+    Project::write_project(filename, hex_file, structeditor_ui->get_document());
+
 #ifndef QT_NO_CURSOR
 	QApplication::restoreOverrideCursor();
 #endif
 
-	statusBar()->showMessage(tr("File saved"), 2000);
+    statusBar()->showMessage(tr("Project saved"), 2000);
 	return true;
 }
 
@@ -169,15 +188,8 @@ void BinGrokWindow::show_preferences()
 void BinGrokWindow::show_struct_editor()
 {
     if (!has_open_file) {
-        if (error_window == nullptr)
-            error_window = new QMessageBox();
-        error_window->setWindowTitle("Error");
-        error_window->setText("Can't edit datastructure when there is no file open!");
-        error_window->show();
+        QMessageBox::warning(this, "Error", "Can't edit datastructure when there is no file open!");
     } else {
-        if (structeditor_ui == NULL) {
-            structeditor_ui = new StructEditor(this);
-        }
         structeditor_ui->show();
     }
 }
@@ -194,13 +206,18 @@ void BinGrokWindow::save_preferences()
 
 void BinGrokWindow::add_recently_open(QFile *f)
 {
-	if (recently_open.contains(f->fileName())){
+    add_recently_open(f->fileName());
+}
+
+void BinGrokWindow::add_recently_open(QString f)
+{
+    if (recently_open.contains(f)){
 		QString fname = recently_open.takeAt(
-					recently_open.indexOf(f->fileName())
+                    recently_open.indexOf(f)
 					);
 		recently_open.prepend(fname);
 	} else {
-		recently_open.prepend(f->fileName());
+        recently_open.prepend(f);
 		while (recently_open.size() > max_recently_open) {
 			recently_open.removeLast();
 		}
@@ -210,13 +227,31 @@ void BinGrokWindow::add_recently_open(QFile *f)
 
 void BinGrokWindow::redraw_recently_open()
 {
+    QKeySequence key;
+    bool shortcut = true;
+
 	ui->menuOpen_Recent->clear();
 	for (int i = 0; i < recently_open.size(); i++) {
 		QString txt = QString("&%1 %2").arg(i+1).arg(recently_open[i]);
-		QAction *action = ui->menuOpen_Recent->addAction(txt,
-									   this, SLOT(open_recent()));
+        QAction *action = ui->menuOpen_Recent->addAction(txt, this, SLOT(open_recent()));
 		action->setData(recently_open[i]);
 		action->setVisible(true);
+        switch(i+1) {
+        case 1:
+            key = Qt::Key_1 | Qt::CTRL;
+            break;
+        case 2:
+            key = Qt::Key_2 | Qt::CTRL;
+            break;
+        case 3:
+            key = Qt::Key_3 | Qt::CTRL;
+            break;
+        default:
+            shortcut = false;
+            break;
+        }
+        if (shortcut)
+            action->setShortcut(key);
 	}
 }
 

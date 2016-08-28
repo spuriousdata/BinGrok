@@ -11,6 +11,7 @@
 #include <QErrorMessage>
 #include <QException>
 #include <QPushButton>
+#include <QMessageBox>
 #include <string>
 
 extern void parse(std::string & in);
@@ -18,8 +19,7 @@ extern void parse(std::string & in);
 
 StructEditor::StructEditor(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::StructEditor),
-    error_window(new QMessageBox)
+    ui(new Ui::StructEditor)
 {
     ui->setupUi(this);
     highlighter = new SyntaxHighlighter(ui->struct_textedit->document());
@@ -36,8 +36,13 @@ StructEditor::StructEditor(QWidget *parent) :
 StructEditor::~StructEditor()
 {
     delete ui;
-    delete error_window;
 }
+
+void StructEditor::set_struct_string(QString &s)
+{
+    ui->struct_textedit->setText(s);
+}
+
 
 void StructEditor::show_datavisualizer(Struct *s)
 {
@@ -52,6 +57,11 @@ void StructEditor::close_and_apply()
 {
     apply_struct();
     close();
+}
+
+QString StructEditor::get_document()
+{
+    return ui->struct_textedit->document()->toPlainText();
 }
 
 void StructEditor::apply_struct()
@@ -69,9 +79,6 @@ void StructEditor::apply_struct()
         show_datavisualizer(s);
         emit struct_applied(start_offset, s->record_length()-1);
     } catch (RDParser::ParserException &e) {
-        error_window->setWindowTitle("Parse Error");
-        error_window->setWindowFlags(Qt::WindowStaysOnTopHint);
-        error_window->setText(e.message);
-        error_window->show();
+        QMessageBox::warning(this, "Parse Error", e.message);
     }
 }

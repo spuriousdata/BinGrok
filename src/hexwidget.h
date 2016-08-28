@@ -25,7 +25,7 @@ public:
     explicit HexWidget(QWidget *parent = 0);
 	~HexWidget();
 	void new_file();
-	bool open(const QString & filename);
+    bool open(const QString & filename, bool _emit=true);
 	bool maybe_save();
 	inline quint8 get_bytes_per_column() { return bytes_per_column; }
 	void set_scrollbar(QScrollBar *s);

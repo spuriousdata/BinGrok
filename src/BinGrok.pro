@@ -23,7 +23,8 @@ SOURCES += \
     structtypes.cc \
     rd_parser.cc \
     datavisualizer.cc \
-    dataviswidget.cpp
+    dataviswidget.cc \
+    project.cc
 
 HEADERS  += \
     bingrokwindow.h \
@@ -38,7 +39,8 @@ HEADERS  += \
     structtypes.h \
     rd_parser.h \
     datavisualizer.h \
-    dataviswidget.h
+    dataviswidget.h \
+    project.h
 
 FORMS    += \
     bingrokwindow.ui \
